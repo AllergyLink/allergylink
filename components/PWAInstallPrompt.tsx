@@ -19,8 +19,8 @@ export default function PWAInstallPrompt() {
       return;
     }
 
-    // Check if running as PWA
-    if (window.navigator.standalone === true) {
+    // Check if running as PWA (iOS Safari)
+    if ('standalone' in window.navigator && (window.navigator as any).standalone === true) {
       setIsInstalled(true);
       return;
     }
