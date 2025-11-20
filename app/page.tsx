@@ -1,5 +1,11 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Page() {
   const year = new Date().getFullYear();
+  const router = useRouter();
 
 
 
@@ -53,19 +59,21 @@ export default function Page() {
 
             </a>
 
-            <a href="#faq" className="al-nav-link">
+            <Link href="/faq" className="al-nav-link" style={{ textDecoration: 'none', color: 'inherit' }}>
 
               FAQ
 
-            </a>
+            </Link>
 
-            <a href="#support" className="al-nav-link">
+            <Link href="/support" className="al-nav-link" style={{ textDecoration: 'none', color: 'inherit' }}>
 
               Support
 
-            </a>
+            </Link>
 
-            <button className="al-nav-cta">Access Profile</button>
+            <Link href="/auth/sign-in" className="al-nav-cta" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Access Profile
+            </Link>
 
           </nav>
 
@@ -117,13 +125,16 @@ export default function Page() {
 
               <div className="al-hero-actions">
 
-                <button className="al-button al-button-primary">
+                <Link href="/auth/sign-up" className="al-button al-button-primary" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-block' }}>
 
                   Create My Link
 
-                </button>
+                </Link>
 
-                <button className="al-button al-button-outline">
+                <button 
+                  className="al-button al-button-outline"
+                  onClick={() => router.push('/dashboard')}
+                >
 
                   View Demo
 
@@ -195,17 +206,27 @@ export default function Page() {
 
               <div className="al-profile-actions">
 
-                <button className="al-button al-button-small">
+                <button 
+                  className="al-button al-button-small"
+                  onClick={() => {
+                    navigator.clipboard.writeText('ALY-12345678');
+                    alert('ID copied!');
+                  }}
+                >
 
                   Copy ID
 
                 </button>
 
-                <button className="al-button al-button-small al-button-outline">
+                <Link 
+                  href="/id/share" 
+                  className="al-button al-button-small al-button-outline"
+                  style={{ textDecoration: 'none', color: 'inherit', display: 'inline-block' }}
+                >
 
                   Share Profile
 
-                </button>
+                </Link>
 
               </div>
 
@@ -230,6 +251,82 @@ export default function Page() {
               </div>
 
             </aside>
+
+          </section>
+
+
+
+          {/* WHY ALLERGYLINK */}
+
+          <section className="al-section">
+
+            <h2 className="al-section-title">Why AllergyLink</h2>
+
+            <p className="al-section-intro">
+
+              Built for parents, users, and venues who need clarity and safety
+
+              without complexity.
+
+            </p>
+
+
+
+            <div className="al-grid-3">
+
+              <div className="al-card">
+
+                <h3 className="al-card-title">For Families</h3>
+
+                <p className="al-card-text">
+
+                  Create profiles for everyone in your family. Share allergy
+
+                  information instantly with restaurants, schools, camps, and
+
+                  events—no apps or passwords required.
+
+                </p>
+
+              </div>
+
+
+
+              <div className="al-card">
+
+                <h3 className="al-card-title">For Users</h3>
+
+                <p className="al-card-text">
+
+                  Control what venues see. Your AllergyLink ID is yours to share
+
+                  when and where you choose. Update your profile anytime, and
+
+                  venues see the latest information.
+
+                </p>
+
+              </div>
+
+
+
+              <div className="al-card">
+
+                <h3 className="al-card-title">For Venues</h3>
+
+                <p className="al-card-text">
+
+                  See clear allergy cards instantly. No account setup, no forms
+
+                  to fill out. Just scan a QR code or enter an ID to view
+
+                  verified allergy and dietary information.
+
+                </p>
+
+              </div>
+
+            </div>
 
           </section>
 
@@ -633,11 +730,11 @@ export default function Page() {
 
             <div className="al-footer-links">
 
-              <a href="#faq">FAQ</a>
+              <Link href="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>FAQ</Link>
 
               <span>•</span>
 
-              <a href="#support">Support</a>
+              <Link href="/support" style={{ textDecoration: 'none', color: 'inherit' }}>Support</Link>
 
             </div>
 

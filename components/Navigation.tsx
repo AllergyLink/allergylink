@@ -96,12 +96,12 @@ export default function Navigation() {
           <a href="/#for-restaurants" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 600, padding: '16px 0' }}>
             For Restaurants
           </a>
-          <a href="/#faq" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 600, padding: '16px 0' }}>
+          <Link href="/faq" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 600, padding: '16px 0' }}>
             FAQ
-          </a>
-          <a href="/#support" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 600, padding: '16px 0' }}>
+          </Link>
+          <Link href="/support" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 600, padding: '16px 0' }}>
             Support
-          </a>
+          </Link>
           <Link href="/trusted-supporters" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 600, padding: '16px 0' }}>
             Trusted Supporters
           </Link>
@@ -158,12 +158,12 @@ export default function Navigation() {
           <a href="/#for-restaurants" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
             For Restaurants
           </a>
-          <a href="/#faq" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
+          <Link href="/faq" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
             FAQ
-          </a>
-          <a href="/#support" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
+          </Link>
+          <Link href="/support" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
             Support
-          </a>
+          </Link>
           <Link href="/trusted-supporters" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
             Trusted Supporters
           </Link>
