@@ -147,6 +147,7 @@
   - ✅ Copy ID
   - ✅ Show Full QR
   - ✅ Share Profile
+- ❌ **NOT LOADING FROM STORAGE** - Uses hardcoded mock data
 
 ### Family Profiles Section
 - ✅ Shows list of family members
@@ -155,6 +156,7 @@
   - ✅ Sharing the card
   - ✅ Editing the profile
 - ✅ Large button/card: "+ Add Family Member"
+- ❌ **NOT LOADING FROM STORAGE** - Uses hardcoded mock data
 
 ### Shared Venues & Recipients Section
 - ✅ Chronological list of:
@@ -167,12 +169,13 @@
   - ✅ City/State
   - ✅ Date shared
   - ✅ "Safe Visit" tag (placeholder)
+- ❌ **NOT LOADING FROM STORAGE** - Uses hardcoded data
 
 ### Saved / Favorite Venues Section
 - ✅ Users can mark venues as favorites (star)
 - ✅ Keep simple list of saved places
 - ✅ Share AllergyLink ID quickly to any saved venue
-- 🟡 Add/remove favorites functionality (UI ready, needs state management)
+- ❌ **NO FUNCTIONALITY** - Add button has no onClick handler
 
 ### Bottom Navigation (Dashboard Only)
 - ✅ Tabs include:
@@ -181,7 +184,7 @@
   3. ✅ Venues — Shows Shared + Favorites
   4. ✅ Settings — Allows toggles (name visibility, color theme, etc.)
 
-**Status:** ✅ **COMPLETE** - Minor enhancement needed for favorites state management
+**Status:** ❌ **NOT FUNCTIONAL** - UI complete but doesn't load real data from storage
 
 ---
 
@@ -199,10 +202,11 @@
   - ✅ Notes for kitchen
 - ✅ No personal identifying info (phone, last name, etc.)
 - ✅ Clear message at bottom: "This information is shared for safety only."
-- ✅ "Record Safe Visit" button
-- ✅ "Print Profile" button
+- ✅ "Record Safe Visit" button (shows alert)
+- ✅ "Print Profile" button (works)
+- ❌ **NOT LOADING FROM ID** - Uses hardcoded mock data, doesn't read URL parameter
 
-**Status:** ✅ **COMPLETE**
+**Status:** ❌ **NOT FUNCTIONAL** - UI complete but doesn't load profile from ID
 
 ---
 
@@ -261,8 +265,9 @@
 - ✅ Privacy & security options
 - ✅ Live update toggle
 - ✅ Bottom navigation
+- ❌ **NOT PERSISTED** - All settings use local state only, not saved to storage
 
-**Status:** ✅ **COMPLETE**
+**Status:** 🟡 **PARTIAL** - UI works but settings don't persist
 
 ---
 
@@ -285,55 +290,85 @@
 
 ## 🔄 MISSING / NEEDS WORK
 
-### High Priority
-1. ❌ **Emergency Contact Persistence** - Emergency contact data not saved to profile model
-2. 🟡 **Dietary Cross-Contamination Toggles** - UI mentions it, but toggles not fully implemented per restriction
-3. 🟡 **Allergen Notes Field** - Notes can only be added to "Other" allergies, not standard ones
-4. 🟡 **Favorites State Management** - UI exists but needs proper state persistence
-5. 🟡 **Live Preview Enhancement** - Could be more prominent/always visible in Create Profile
+### 🔴 CRITICAL (Blocks Core Functionality)
+1. ❌ **Dashboard Data Loading** - Dashboard uses hardcoded mock data, doesn't load from storage
+2. ❌ **Family Page Data Loading** - Family page uses hardcoded mock data, doesn't load from storage
+3. ❌ **Venue View Data Loading** - Venue view uses hardcoded data, doesn't load profile from URL ID
+4. ❌ **Shared Venues Loading** - Shared venues are hardcoded, doesn't load from storage
 
-### Medium Priority
-6. 🟡 **Accessibility Audit** - Need to verify all icons/images have proper alt text
-7. 🟡 **Profile Type Persistence** - Profile type selection not saved to profile model
-8. 🟡 **Name Visibility Persistence** - Name visibility toggle not saved to profile model
-9. 🟡 **Theme Persistence** - Theme selection not saved to user preferences
+### 🟠 HIGH PRIORITY (Data Persistence)
+5. ❌ **Settings Persistence** - All settings use local state only, not saved to storage
+6. ❌ **Emergency Contact Persistence** - Emergency contact data not saved to profile model
+7. ❌ **Profile Type Persistence** - Profile type selection not saved to profile model
+8. ❌ **Name Visibility Persistence** - Name visibility toggle not saved to profile model
 
-### Low Priority / Nice to Have
-10. 🟡 **Logo Files** - Need actual logo images in `/public/logos/` directory
-11. 🟡 **Avatar Generation** - Default avatar creation could be more sophisticated
-12. 🟡 **Profile Photo Upload** - Currently uses FileReader, could add image optimization
-13. 🟡 **Print Styles** - Venue view print button works but could have better print styles
+### 🟡 MEDIUM PRIORITY (UX Improvements)
+9. 🟡 **Dietary Cross-Contamination Toggles** - UI mentions it, but toggles not fully implemented per restriction
+10. 🟡 **Allergen Notes Field** - Notes can only be added to "Other" allergies, not standard ones
+11. 🟡 **Favorites Functionality** - Add button has no onClick handler, no state management
+12. 🟡 **Copy Feedback UX** - Uses `alert()` instead of toast notifications
+13. 🟡 **Live Preview Enhancement** - Could be more prominent/always visible in Create Profile
+
+### 🟢 LOW PRIORITY / Nice to Have
+14. 🟡 **Accessibility Audit** - Need to verify all icons/images have proper alt text
+15. 🟡 **Logo Files** - Need actual logo images in `/public/logos/` directory
+16. 🟡 **Avatar Generation** - Default avatar creation could be more sophisticated
+17. 🟡 **Profile Photo Upload** - Currently uses FileReader, could add image optimization
+18. 🟡 **Print Styles** - Venue view print button works but could have better print styles
+19. 🟡 **Trusted Supporters Preferences** - Radio button state not persisted
 
 ---
 
 ## 📈 IMPLEMENTATION SUMMARY
 
-### Overall Status: 🟡 **~90% COMPLETE**
+### Overall Status: 🟡 **~60% FUNCTIONAL**
 
-- **Completed:** 8/10 major sections (80%)
-- **In Progress:** 2/10 major sections (20%)
-- **Missing:** Minor features and persistence layers
+- **UI Complete:** 10/10 major sections (100%)
+- **Functionally Complete:** 4/10 major sections (40%)
+- **Data Loading Issues:** 4 critical sections don't load from storage
+- **Persistence Issues:** Multiple settings/fields don't save
 
 ### Next Steps (Priority Order)
 
-1. **Add Emergency Contact to Profile Model** - Update `lib/models.ts` and storage
-2. **Implement Dietary Cross-Contamination Toggles** - Add per-restriction toggle UI
-3. **Add Allergen Notes Field** - Allow notes on all allergens, not just "Other"
-4. **Implement Favorites State Management** - Add to storage/local state
-5. **Enhance Live Preview** - Make it more prominent in Create Profile flow
-6. **Accessibility Audit** - Add missing alt text and ARIA labels
-7. **Add Logo Files** - Create placeholder or actual logos in `/public/logos/`
+#### 🔴 CRITICAL (Must Fix for MVP)
+1. **Fix Dashboard Data Loading** - Use `getProfile()` and `listProfiles()` instead of mock data
+2. **Fix Family Page Data Loading** - Use `listProfiles(true)` to load family members
+3. **Fix Venue View** - Create dynamic route `/id/venue/[id]` and load profile from ID
+4. **Fix Shared Venues** - Use `listShared()` to load actual shared venues
+
+#### 🟠 HIGH PRIORITY (Data Persistence)
+5. **Add Settings Persistence** - Save/load settings from localStorage
+6. **Add Emergency Contact to Profile Model** - Update `lib/models.ts` and save in `createProfile()`
+7. **Save Profile Type** - Set `familyOf` field based on profile type selection
+8. **Save Name Visibility** - Add `nameVisible` field to Profile model
+
+#### 🟡 MEDIUM PRIORITY (UX)
+9. **Implement Favorites Functionality** - Add onClick handlers and state management
+10. **Replace Alert() with Toast** - Better UX for copy/action feedback
+11. **Implement Dietary Cross-Contamination Toggles** - Per-restriction toggle UI
+12. **Add Allergen Notes Field** - Allow notes on all allergens
 
 ---
 
 ## 🎯 MVP READINESS
 
-**Current State:** The app has all major UI affordances implemented. The core user flows work end-to-end. Remaining work is primarily:
-- Data persistence for new fields (emergency contact, profile type, etc.)
-- Minor UX enhancements (live preview, favorites state)
-- Accessibility polish
+**Current State:** 
+- ✅ All UI affordances are implemented and look correct
+- ✅ Profile creation and saving works
+- ❌ Profile viewing/loading doesn't work (uses mock data)
+- ❌ Settings don't persist
+- ⚠️ Several data fields not saved
 
-**Estimated Completion:** 2-3 days of focused work to reach 100% MVP completeness.
+**Critical Blockers:**
+1. Dashboard doesn't show user's actual profiles
+2. Family page doesn't show actual family members
+3. Venue view doesn't load profile from ID
+4. Settings don't persist between sessions
+
+**Estimated Completion:** 3-5 days of focused work to reach 100% MVP functionality.
+- 1-2 days: Fix data loading issues
+- 1-2 days: Add persistence for all fields
+- 1 day: UX improvements and polish
 
 ---
 
