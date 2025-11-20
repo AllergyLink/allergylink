@@ -73,6 +73,8 @@ export default function VenueView() {
     );
   }
 
+  const hasAnaphylactic = profile.allergies.some(a => a.severity === 'anaphylactic');
+
   return (
     <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
       <Navigation />
@@ -116,18 +118,20 @@ export default function VenueView() {
                 />
               ))}
             </div>
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #FCA5A5', borderRadius: '12px', padding: '16px' }}>
-              <div style={{ fontWeight: 600, marginBottom: '8px', color: '#B91C1C' }}>
-                ⚠️ Anaphylactic Allergies Present
+            {hasAnaphylactic && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #FCA5A5', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ fontWeight: 600, marginBottom: '8px', color: '#B91C1C' }}>
+                  ⚠️ Anaphylactic Allergies Present
+                </div>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#991B1B' }}>
+                  This guest has severe allergies that require strict avoidance and no cross-contamination.
+                </p>
               </div>
-              <p style={{ margin: 0, fontSize: '0.875rem', color: '#991B1B' }}>
-                This guest has severe allergies that require strict avoidance and no cross-contamination.
-              </p>
-            </div>
+            )}
           </section>
 
           {/* Dietary Restrictions */}
-          {profile.dietary.length > 0 && (
+          {profile.dietary && profile.dietary.length > 0 && (
             <section style={{ marginBottom: '32px' }}>
               <h2 style={{ marginBottom: '16px', color: 'var(--color-primary)' }}>Dietary Restrictions</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>

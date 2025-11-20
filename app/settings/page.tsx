@@ -1,16 +1,132 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import BottomNavigation from '@/components/ui/BottomNavigation';
+import { useAuth } from '@/lib/firebase/hooks';
+import { getSettings, updateSettings } from '@/lib/firebase/storage';
+import { getCurrentUser } from '@/lib/firebase/auth';
 
 export default function Settings() {
+  const { user, loading: authLoading } = useAuth();
   const [nameVisible, setNameVisible] = useState(true);
   const [theme, setTheme] = useState<'light' | 'mint'>('light');
-  const [phone, setPhone] = useState('(555) 555-1212');
+  const [phone, setPhone] = useState('');
   const [liveUpdates, setLiveUpdates] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const loadSettings = async () => {
+      try {
+        const settings = await getSettings(user.uid);
+        if (settings) {
+          setNameVisible(settings.nameVisible ?? true);
+          setTheme(settings.theme ?? 'light');
+          setPhone(settings.phone || user.phoneNumber || '');
+          setLiveUpdates(settings.liveUpdates ?? true);
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, [user, authLoading]);
+
+  const handleNameVisibleChange = async (value: boolean) => {
+    setNameVisible(value);
+    if (user) {
+      setSaving(true);
+      try {
+        await updateSettings(user.uid, { nameVisible: value });
+      } catch (error) {
+        console.error('Error updating settings:', error);
+        setNameVisible(!value); // Revert on error
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  const handleThemeChange = async (value: 'light' | 'mint') => {
+    setTheme(value);
+    if (user) {
+      setSaving(true);
+      try {
+        await updateSettings(user.uid, { theme: value });
+      } catch (error) {
+        console.error('Error updating settings:', error);
+        setTheme(theme); // Revert on error
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  const handleLiveUpdatesChange = async (value: boolean) => {
+    setLiveUpdates(value);
+    if (user) {
+      setSaving(true);
+      try {
+        await updateSettings(user.uid, { liveUpdates: value });
+      } catch (error) {
+        console.error('Error updating settings:', error);
+        setLiveUpdates(!value); // Revert on error
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  const handlePhoneUpdate = async () => {
+    if (user) {
+      setSaving(true);
+      try {
+        await updateSettings(user.uid, { phone });
+      } catch (error) {
+        console.error('Error updating phone:', error);
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  if (authLoading || loading) {
+    return (
+      <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
+        <Navigation />
+        <div className="container section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+          <div>Loading...</div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
+        <Navigation />
+        <div className="container section" style={{ textAlign: 'center' }}>
+          <h2>Please sign in to view settings</h2>
+          <Link href="/auth/sign-in" className="btn btn-primary" style={{ marginTop: '16px' }}>
+            Sign In
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
@@ -30,8 +146,9 @@ export default function Settings() {
             </div>
             <button
               className={nameVisible ? 'toggle on' : 'toggle'}
-              onClick={() => setNameVisible(!nameVisible)}
-              style={{ cursor: 'pointer' }}
+              onClick={() => handleNameVisibleChange(!nameVisible)}
+              style={{ cursor: saving ? 'wait' : 'pointer' }}
+              disabled={saving}
             ></button>
           </div>
         </div>
@@ -47,14 +164,16 @@ export default function Settings() {
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
-                onClick={() => setTheme('light')}
+                onClick={() => handleThemeChange('light')}
                 className={theme === 'light' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
+                disabled={saving}
               >
                 Light
               </button>
               <button
-                onClick={() => setTheme('mint')}
+                onClick={() => handleThemeChange('mint')}
                 className={theme === 'mint' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
+                disabled={saving}
               >
                 Mint
               </button>
@@ -74,7 +193,13 @@ export default function Settings() {
                   onChange={(e) => setPhone(e.target.value)}
                   style={{ flex: 1 }}
                 />
-                <button className="btn btn-secondary btn-sm">Update</button>
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={handlePhoneUpdate}
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : 'Update'}
+                </button>
               </div>
             </div>
           </div>
@@ -118,8 +243,9 @@ export default function Settings() {
             </div>
             <button
               className={liveUpdates ? 'toggle on' : 'toggle'}
-              onClick={() => setLiveUpdates(!liveUpdates)}
-              style={{ cursor: 'pointer' }}
+              onClick={() => handleLiveUpdatesChange(!liveUpdates)}
+              style={{ cursor: saving ? 'wait' : 'pointer' }}
+              disabled={saving}
             ></button>
           </div>
         </div>

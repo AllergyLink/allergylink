@@ -1,12 +1,15 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import QR from '@/components/QR';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { TOP_ALLERGIES } from '@/lib/constants';
 import type { Severity } from '@/lib/models';
-import { newId, upsertProfile } from '@/lib/storage';
+import { newId } from '@/lib/firebase/storage';
+import { upsertProfile } from '@/lib/firebase/storage';
+import { useAuth } from '@/lib/firebase/hooks';
 
 const severityLabels: Record<Severity, string> = {
   anaphylactic: 'Severe / Anaphalatic - no cross contamination -',
@@ -51,6 +54,7 @@ type PreviewProfile = {
 type ProfileType = 'primary' | 'secondary' | 'family';
 
 export default function CreateProfile() {
+  const { user, loading: authLoading } = useAuth();
   const [profileType, setProfileType] = useState<ProfileType>('primary');
   const [makePrimary, setMakePrimary] = useState(true);
   const [firstName, setFirstName] = useState('');
@@ -69,6 +73,7 @@ export default function CreateProfile() {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [preview, setPreview] = useState<PreviewProfile | null>(null);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const allergyList = useMemo(() => TOP_ALLERGIES, []);
@@ -122,29 +127,71 @@ export default function CreateProfile() {
     reader.readAsDataURL(file);
   };
 
-  const createProfile = (withPreview = true) => {
-    const id = newId();
-    const allergies = [
-      ...Object.values(selectedAllergies),
-      ...otherAllergies.filter((o) => o.name.trim() !== ''),
-    ];
+  const createProfile = async (withPreview = true) => {
+    if (!user) {
+      alert('Please sign in to create a profile');
+      return;
+    }
 
-    upsertProfile({
-      id,
-      firstName,
-      avatarUrl,
-      allergies,
-      dietary: selectedDietary,
-      updatedAt: new Date().toISOString(),
-    });
+    setSaving(true);
+    try {
+      const id = newId();
+      const allergies = [
+        ...Object.values(selectedAllergies),
+        ...otherAllergies.filter((o) => o.name.trim() !== ''),
+      ];
 
-    if (withPreview) {
-      setPreview({ id, firstName, avatarUrl, allergies, dietary: selectedDietary });
-      setShowPreview(true);
+      const profileData = {
+        id,
+        userId: user.uid,
+        firstName,
+        nameVisible,
+        avatarUrl,
+        allergies,
+        dietary: selectedDietary,
+        emergencyContact: emergencyContact.name ? emergencyContact : undefined,
+        updatedAt: new Date().toISOString(),
+        isPrimary: profileType === 'primary' || makePrimary,
+        profileType,
+        familyOf: profileType === 'family' ? undefined : undefined, // TODO: Set parent ID if needed
+      };
+
+      await upsertProfile(profileData);
+
+      if (withPreview) {
+        setPreview({ id, firstName, avatarUrl, allergies, dietary: selectedDietary });
+        setShowPreview(true);
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const resetAvatar = () => setAvatarUrl(undefined);
+
+  if (authLoading) {
+    return (
+      <main className="page-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div>Loading...</div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="page-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2>Please sign in to create a profile</h2>
+          <Link href="/auth/sign-in" className="btn btn-primary" style={{ marginTop: '16px' }}>
+            Sign In
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main
@@ -517,8 +564,9 @@ export default function CreateProfile() {
                 onClick={() => createProfile(true)}
                 className="btn btn-primary"
                 style={{ minHeight: '48px' }}
+                disabled={saving}
               >
-                Save Profile
+                {saving ? 'Saving...' : 'Save Profile'}
               </button>
               <button
                 onClick={() => {
@@ -527,8 +575,9 @@ export default function CreateProfile() {
                 }}
                 className="btn btn-accent"
                 style={{ minHeight: '48px' }}
+                disabled={saving}
               >
-                Save & Add Family Member
+                {saving ? 'Saving...' : 'Save & Add Family Member'}
               </button>
             </footer>
           </div>

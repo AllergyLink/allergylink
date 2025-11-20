@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -9,39 +9,46 @@ import QR from '@/components/QR';
 import ProfileCard from '@/components/ui/ProfileCard';
 import FamilyProfileCard from '@/components/ui/FamilyProfileCard';
 import VenueListItem from '@/components/ui/VenueListItem';
+import { useAuth } from '@/lib/firebase/hooks';
+import { getPrimaryProfile, listProfiles, listShared } from '@/lib/firebase/storage';
+import type { Profile, SharedEntry } from '@/lib/models';
 
 export default function Dashboard() {
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'venues' | 'supporters'>('dashboard');
+  const [primaryProfile, setPrimaryProfile] = useState<Profile | null>(null);
+  const [familyProfiles, setFamilyProfiles] = useState<Profile[]>([]);
+  const [sharedVenues, setSharedVenues] = useState<SharedEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock primary profile
-  const primaryProfile = {
-    id: 'ALY-12345678',
-    firstName: 'Madeline',
-    avatarUrl: undefined,
-    allergies: [
-      { name: 'Peanut', severity: 'anaphylactic' as const },
-      { name: 'Dairy', severity: 'no-cross' as const },
-      { name: 'Soy', severity: 'cross-ok' as const }
-    ],
-    dietary: ['Vegetarian'],
-    updatedAt: new Date().toISOString()
-  };
-
-  // Mock family profiles
-  const familyProfiles = [
-    {
-      id: 'ALY-87654321',
-      firstName: 'Jacob',
-      avatarUrl: undefined,
-      allergies: [
-        { name: 'Gluten', severity: 'no-cross' as const },
-        { name: 'Dairy', severity: 'cross-ok' as const }
-      ],
-      dietary: [],
-      updatedAt: new Date().toISOString(),
-      familyOf: 'ALY-12345678'
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      setLoading(false);
+      return;
     }
-  ];
+
+    const loadData = async () => {
+      try {
+        const [primary, family, shared] = await Promise.all([
+          getPrimaryProfile(user.uid),
+          listProfiles(user.uid, true),
+          listShared(user.uid),
+        ]);
+        
+        setPrimaryProfile(primary);
+        setFamilyProfiles(family);
+        setSharedVenues(shared);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user, authLoading]);
 
   const TabButton = ({ id, label, isActive, onClick }: { id: string; label: string; isActive: boolean; onClick: () => void }) => (
     <button
@@ -89,6 +96,31 @@ export default function Dashboard() {
     </Link>
   );
 
+  if (authLoading || loading) {
+    return (
+      <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
+        <Navigation />
+        <div className="container-wide section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+          <div>Loading...</div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
+        <Navigation />
+        <div className="container-wide section" style={{ textAlign: 'center' }}>
+          <h2>Please sign in to view your dashboard</h2>
+          <Link href="/auth/sign-in" className="btn btn-primary" style={{ marginTop: '16px' }}>
+            Sign In
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
       <Navigation />
@@ -115,9 +147,10 @@ export default function Dashboard() {
           <div>
             <h2 style={{ marginBottom: '24px' }}>My Profiles</h2>
             
-            <div className="grid grid-2" style={{ marginBottom: '48px' }}>
-              {/* Primary Profile Card */}
-              <ProfileCard profile={primaryProfile} showActions={true} showQR={false} />
+            {primaryProfile ? (
+              <div className="grid grid-2" style={{ marginBottom: '48px' }}>
+                {/* Primary Profile Card */}
+                <ProfileCard profile={primaryProfile} showActions={true} showQR={false} />
               
               {/* QR Code Card */}
               <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -146,14 +179,28 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            ) : (
+              <div className="card" style={{ textAlign: 'center', padding: '48px' }}>
+                <p style={{ marginBottom: '16px' }}>No profile found. Create your first profile to get started.</p>
+                <Link href="/create" className="btn btn-primary">
+                  Create Profile
+                </Link>
+              </div>
+            )}
 
             {/* Family Profiles Section */}
-            <h2 style={{ marginBottom: '24px' }}>Family Profiles</h2>
-            <div className="grid grid-2">
-              {familyProfiles.map((profile) => (
-                <FamilyProfileCard key={profile.id} profile={profile} />
-              ))}
-            </div>
+            <h2 style={{ marginBottom: '24px', marginTop: '48px' }}>Family Profiles</h2>
+            {familyProfiles.length > 0 ? (
+              <div className="grid grid-2">
+                {familyProfiles.map((profile) => (
+                  <FamilyProfileCard key={profile.id} profile={profile} />
+                ))}
+              </div>
+            ) : (
+              <div className="card" style={{ textAlign: 'center', padding: '24px' }}>
+                <p className="text-muted" style={{ marginBottom: '16px' }}>No family profiles yet.</p>
+              </div>
+            )}
 
             <div style={{ marginTop: '24px' }}>
               <Link href="/create" className="btn btn-secondary">
@@ -163,25 +210,24 @@ export default function Dashboard() {
 
             {/* Shared Venues Section */}
             <h2 style={{ marginTop: '48px', marginBottom: '24px' }}>Shared Venues & Recipients</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <VenueListItem
-                type="venue"
-                name="Red Lantern"
-                cityState="Boston, MA"
-                date={new Date().toISOString()}
-                safeVisit={true}
-              />
-              <VenueListItem
-                type="venue"
-                name="Green Leaf Café"
-                cityState="Boston, MA"
-                date={new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}
-                safeVisit={true}
-              />
-              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--color-text-muted)' }}>
-                No other shares yet
+            {sharedVenues.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {sharedVenues.map((venue, idx) => (
+                  <VenueListItem
+                    key={idx}
+                    type={venue.type}
+                    name={venue.name}
+                    cityState={venue.cityState}
+                    date={venue.date}
+                    safeVisit={true}
+                  />
+                ))}
               </div>
-            </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--color-text-muted)' }}>
+                No shared venues yet
+              </div>
+            )}
 
             {/* Saved / Favorite Venues Section */}
             <h2 style={{ marginTop: '48px', marginBottom: '24px' }}>Saved / Favorite Venues</h2>
