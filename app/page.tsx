@@ -235,6 +235,82 @@ export default function Page() {
 
 
 
+          {/* WHY ALLERGYLINK */}
+
+          <section className="al-section">
+
+            <h2 className="al-section-title">Why AllergyLink</h2>
+
+            <p className="al-section-intro">
+
+              Built for parents, users, and venues who need clarity and safety
+
+              without complexity.
+
+            </p>
+
+
+
+            <div className="al-grid-3">
+
+              <div className="al-card">
+
+                <h3 className="al-card-title">For Families</h3>
+
+                <p className="al-card-text">
+
+                  Create profiles for everyone in your family. Share allergy
+
+                  information instantly with restaurants, schools, camps, and
+
+                  events—no apps or passwords required.
+
+                </p>
+
+              </div>
+
+
+
+              <div className="al-card">
+
+                <h3 className="al-card-title">For Users</h3>
+
+                <p className="al-card-text">
+
+                  Control what venues see. Your AllergyLink ID is yours to share
+
+                  when and where you choose. Update your profile anytime, and
+
+                  venues see the latest information.
+
+                </p>
+
+              </div>
+
+
+
+              <div className="al-card">
+
+                <h3 className="al-card-title">For Venues</h3>
+
+                <p className="al-card-text">
+
+                  See clear allergy cards instantly. No account setup, no forms
+
+                  to fill out. Just scan a QR code or enter an ID to view
+
+                  verified allergy and dietary information.
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+
           {/* HOW IT WORKS */}
 
           <section id="how" className="al-section">

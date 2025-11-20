@@ -2,23 +2,24 @@
 
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import TrustedSupporterCard from '@/components/ui/TrustedSupporterCard';
 
 export default function TrustedSupporters() {
   const supporters = [
     {
       name: 'Boston Children\'s Hospital',
       description: 'Leading pediatric allergy care center using AllergyLink to streamline patient information sharing.',
-      logo: null
+      logo: '/logos/boston-childrens.png'
     },
     {
       name: 'Food Allergy Research & Education (FARE)',
       description: 'National nonprofit organization supporting the food allergy community with AllergyLink integration.',
-      logo: null
+      logo: '/logos/fare.png'
     },
     {
       name: 'AllergyEats',
       description: 'Restaurant review platform for allergy-friendly dining, now powered by AllergyLink profiles.',
-      logo: null
+      logo: '/logos/allergyeats.png'
     }
   ];
 
@@ -36,37 +37,14 @@ export default function TrustedSupporters() {
 
         <div className="grid grid-3">
           {supporters.map((supporter, idx) => (
-            <div key={idx} className="card">
-              <div style={{
-                width: '80px',
-                height: '80px',
-            borderRadius: '16px',
-                background: 'var(--color-bg)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '20px',
-                border: '1px solid var(--color-border)'
-              }}>
-                {supporter.logo ? (
-                  <img src={supporter.logo} alt={supporter.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                ) : (
-                <div style={{
-                    fontSize: '2rem',
-                    fontWeight: 700,
-                    color: 'var(--color-primary)'
-                  }}>
-                    {supporter.name.charAt(0)}
-              </div>
-                )}
-              </div>
-              <h3 style={{ marginBottom: '12px' }}>{supporter.name}</h3>
-              <p className="text-muted" style={{ margin: 0, lineHeight: 1.6 }}>
-                {supporter.description}
-              </p>
-            </div>
+            <TrustedSupporterCard
+              key={idx}
+              name={supporter.name}
+              description={supporter.description}
+              logo={supporter.logo}
+            />
           ))}
-          </div>
+        </div>
 
         <div className="card" style={{ marginTop: '48px', background: 'rgba(0, 82, 204, 0.05)', borderColor: 'var(--color-primary)' }}>
           <h3 style={{ marginBottom: '12px', color: 'var(--color-primary)' }}>

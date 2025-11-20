@@ -48,14 +48,25 @@ type PreviewProfile = {
   dietary: string[];
 };
 
+type ProfileType = 'primary' | 'secondary' | 'family';
+
 export default function CreateProfile() {
+  const [profileType, setProfileType] = useState<ProfileType>('primary');
+  const [makePrimary, setMakePrimary] = useState(true);
   const [firstName, setFirstName] = useState('');
+  const [nameVisible, setNameVisible] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>();
   const [selectedAllergies, setSelectedAllergies] = useState<Record<string, SelectedAllergy>>({});
   const [otherAllergies, setOtherAllergies] = useState(
     Array.from({ length: 3 }, () => ({ name: '', severity: INITIAL_SEVERITY }))
   );
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
+  const [emergencyContact, setEmergencyContact] = useState({
+    name: '',
+    relationship: '',
+    phone: '',
+    notes: ''
+  });
   const [showPreview, setShowPreview] = useState(false);
   const [preview, setPreview] = useState<PreviewProfile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -183,14 +194,67 @@ export default function CreateProfile() {
               }}>
                 Create your sharable AllergyLink Profile
               </h1>
-              <button
-                onClick={() => createProfile(true)}
-                className="btn btn-primary"
-                style={{ alignSelf: 'flex-start', minHeight: '48px' }}
-              >
-                Create Personal Profile
-              </button>
             </header>
+
+            {/* Profile Type Selection */}
+            <section>
+              <label style={{ marginBottom: '12px', display: 'block' }}>Profile Type</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', borderRadius: '12px', border: profileType === 'primary' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)', background: profileType === 'primary' ? 'rgba(0, 82, 204, 0.05)' : 'white' }}>
+                  <input
+                    type="radio"
+                    name="profileType"
+                    value="primary"
+                    checked={profileType === 'primary'}
+                    onChange={(e) => setProfileType(e.target.value as ProfileType)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>Primary Personal Profile</div>
+                    <div className="text-muted" style={{ fontSize: '0.875rem' }}>Your main allergy profile</div>
+                  </div>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', borderRadius: '12px', border: profileType === 'secondary' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)', background: profileType === 'secondary' ? 'rgba(0, 82, 204, 0.05)' : 'white' }}>
+                  <input
+                    type="radio"
+                    name="profileType"
+                    value="secondary"
+                    checked={profileType === 'secondary'}
+                    onChange={(e) => setProfileType(e.target.value as ProfileType)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>Secondary Personal Profile</div>
+                    <div className="text-muted" style={{ fontSize: '0.875rem' }}>An additional profile for yourself</div>
+                  </div>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', borderRadius: '12px', border: profileType === 'family' ? '2px solid var(--color-primary)' : '1px solid var(--color-border)', background: profileType === 'family' ? 'rgba(0, 82, 204, 0.05)' : 'white' }}>
+                  <input
+                    type="radio"
+                    name="profileType"
+                    value="family"
+                    checked={profileType === 'family'}
+                    onChange={(e) => setProfileType(e.target.value as ProfileType)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>Family Profile</div>
+                    <div className="text-muted" style={{ fontSize: '0.875rem' }}>For a family member (child, partner, etc.)</div>
+                  </div>
+                </label>
+              </div>
+              {profileType !== 'primary' && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={makePrimary}
+                    onChange={(e) => setMakePrimary(e.target.checked)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '0.875rem' }}>Make This My Primary Profile</span>
+                </label>
+              )}
+            </section>
 
             {/* First Name */}
             <section>
@@ -200,6 +264,15 @@ export default function CreateProfile() {
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="e.g. Madeline"
               />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={nameVisible}
+                  onChange={(e) => setNameVisible(e.target.checked)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '0.875rem' }}>Show my name to venues</span>
+              </label>
             </section>
 
             {/* Avatar */}
@@ -361,7 +434,7 @@ export default function CreateProfile() {
                 Dietary Restrictions
               </h2>
               <p className="text-muted" style={{ marginBottom: '16px' }}>
-                Tap to select any dietary needs that apply.
+                Tap to select any dietary needs that apply. Each restriction can have cross-contamination settings.
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                 {dietaryList.map((item) => {
@@ -385,20 +458,77 @@ export default function CreateProfile() {
               </div>
             </section>
 
+            {/* Emergency Contact (Optional) */}
+            <section>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: '8px' }}>
+                Emergency Contact (Optional)
+              </h2>
+              <p className="text-muted" style={{ marginBottom: '16px' }}>
+                Add an emergency contact that venues can reach if needed.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ fontSize: '0.875rem', marginBottom: '4px', display: 'block' }}>Name</label>
+                  <input
+                    value={emergencyContact.name}
+                    onChange={(e) => setEmergencyContact({ ...emergencyContact, name: e.target.value })}
+                    placeholder="Emergency contact name"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.875rem', marginBottom: '4px', display: 'block' }}>Relationship</label>
+                  <input
+                    value={emergencyContact.relationship}
+                    onChange={(e) => setEmergencyContact({ ...emergencyContact, relationship: e.target.value })}
+                    placeholder="e.g. Parent, Spouse, Guardian"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.875rem', marginBottom: '4px', display: 'block' }}>Phone</label>
+                  <input
+                    type="tel"
+                    value={emergencyContact.phone}
+                    onChange={(e) => setEmergencyContact({ ...emergencyContact, phone: e.target.value })}
+                    placeholder="(555) 555-1212"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.875rem', marginBottom: '4px', display: 'block' }}>Notes</label>
+                  <textarea
+                    value={emergencyContact.notes}
+                    onChange={(e) => setEmergencyContact({ ...emergencyContact, notes: e.target.value })}
+                    placeholder="Additional notes for emergency contact"
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: '1.5px solid #C4D6CF',
+                      fontFamily: "'Quicksand', sans-serif",
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
+
             <footer style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '8px' }}>
               <button
                 onClick={() => createProfile(true)}
                 className="btn btn-primary"
                 style={{ minHeight: '48px' }}
               >
-                Create Personal Profile
+                Save Profile
               </button>
               <button
-                onClick={() => createProfile(true)}
+                onClick={() => {
+                  createProfile(true);
+                  // After saving, could redirect to add another family member
+                }}
                 className="btn btn-accent"
                 style={{ minHeight: '48px' }}
               >
-                Create & Add Family Profiles
+                Save & Add Family Member
               </button>
             </footer>
           </div>

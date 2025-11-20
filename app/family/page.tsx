@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import BottomNavigation from '@/components/ui/BottomNavigation';
 
 export default function Family() {
   const familyMembers = [
@@ -92,6 +93,8 @@ export default function Family() {
         </div>
       </div>
 
+      <BottomNavigation />
+      <div style={{ height: '80px' }} /> {/* Spacer for bottom nav */}
       <Footer />
     </main>
   );
