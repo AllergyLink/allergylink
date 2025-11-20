@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:gh-pages": "GITHUB_PAGES=true next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next build && next export"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.56.2",
