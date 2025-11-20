@@ -18,6 +18,24 @@ export default function SignIn() {
   const router = useRouter();
 
   useEffect(() => {
+    // Check Firebase initialization
+    const checkFirebase = async () => {
+      try {
+        const { auth } = await import('@/lib/firebase/config');
+        if (!auth) {
+          setError('Firebase is not initialized. Please check your environment variables.');
+          console.error('Firebase auth is undefined');
+        } else {
+          console.log('Firebase auth initialized:', auth.app.name);
+        }
+      } catch (err) {
+        console.error('Error checking Firebase:', err);
+        setError('Firebase configuration error. Please check the console for details.');
+      }
+    };
+    
+    checkFirebase();
+    
     // Initialize reCAPTCHA
     const verifier = initializeRecaptcha('recaptcha-container');
     return () => {
