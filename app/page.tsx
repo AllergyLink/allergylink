@@ -206,17 +206,27 @@ export default function Page() {
 
               <div className="al-profile-actions">
 
-                <button className="al-button al-button-small">
+                <button 
+                  className="al-button al-button-small"
+                  onClick={() => {
+                    navigator.clipboard.writeText('ALY-12345678');
+                    alert('ID copied!');
+                  }}
+                >
 
                   Copy ID
 
                 </button>
 
-                <button className="al-button al-button-small al-button-outline">
+                <Link 
+                  href="/id/share" 
+                  className="al-button al-button-small al-button-outline"
+                  style={{ textDecoration: 'none', color: 'inherit', display: 'inline-block' }}
+                >
 
                   Share Profile
 
-                </button>
+                </Link>
 
               </div>
 
