@@ -1,20 +1,43 @@
 {
-  "name": "AllergyLink",
+  "name": "AllergyLink | All your allergies. One safe link.",
   "short_name": "AllergyLink",
+  "description": "Create and share a single AllergyLink profile so restaurants, schools, and venues can see your allergy and dietary information in seconds.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4F6F8",
-  "theme_color": "#16A085",
+  "orientation": "portrait",
+  "background_color": "#f4faf9",
+  "theme_color": "#0B59CF",
+  "scope": "/",
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle", "food"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "View Profile",
+      "short_name": "Profile",
+      "description": "View your AllergyLink profile",
+      "url": "/id",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Access your dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

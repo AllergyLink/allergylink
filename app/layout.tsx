@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import ServiceWorkerUpdate from "@/components/ServiceWorkerUpdate";
 
 
 
@@ -11,6 +13,48 @@ export const metadata: Metadata = {
   description:
 
     "Create and share a single AllergyLink profile so restaurants, schools, and venues can see your allergy and dietary information in seconds.",
+
+  manifest: "/manifest.json",
+
+  appleWebApp: {
+
+    capable: true,
+
+    statusBarStyle: "default",
+
+    title: "AllergyLink",
+
+  },
+
+  formatDetection: {
+
+    telephone: false,
+
+  },
+
+  icons: {
+
+    icon: "/icons/icon-192.png",
+
+    apple: "/icons/icon-192.png",
+
+  },
+
+};
+
+
+
+export const viewport: Viewport = {
+
+  themeColor: "#0B59CF",
+
+  width: "device-width",
+
+  initialScale: 1,
+
+  maximumScale: 5,
+
+  userScalable: true,
 
 };
 
@@ -30,7 +74,11 @@ export default function RootLayout({
 
     <html lang="en">
 
-      <body className="al-body">{children}</body>
+      <body className="al-body">
+        {children}
+        <PWAInstallPrompt />
+        <ServiceWorkerUpdate />
+      </body>
 
     </html>
 
