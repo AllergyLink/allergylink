@@ -1,5 +1,11 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Page() {
   const year = new Date().getFullYear();
+  const router = useRouter();
 
 
 
@@ -53,19 +59,21 @@ export default function Page() {
 
             </a>
 
-            <a href="#faq" className="al-nav-link">
+            <Link href="/faq" className="al-nav-link" style={{ textDecoration: 'none', color: 'inherit' }}>
 
               FAQ
 
-            </a>
+            </Link>
 
-            <a href="#support" className="al-nav-link">
+            <Link href="/support" className="al-nav-link" style={{ textDecoration: 'none', color: 'inherit' }}>
 
               Support
 
-            </a>
+            </Link>
 
-            <button className="al-nav-cta">Access Profile</button>
+            <Link href="/auth/sign-in" className="al-nav-cta" style={{ textDecoration: 'none', color: 'inherit' }}>
+              Access Profile
+            </Link>
 
           </nav>
 
@@ -117,13 +125,16 @@ export default function Page() {
 
               <div className="al-hero-actions">
 
-                <button className="al-button al-button-primary">
+                <Link href="/auth/sign-up" className="al-button al-button-primary" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-block' }}>
 
                   Create My Link
 
-                </button>
+                </Link>
 
-                <button className="al-button al-button-outline">
+                <button 
+                  className="al-button al-button-outline"
+                  onClick={() => router.push('/dashboard')}
+                >
 
                   View Demo
 
@@ -709,11 +720,11 @@ export default function Page() {
 
             <div className="al-footer-links">
 
-              <a href="#faq">FAQ</a>
+              <Link href="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>FAQ</Link>
 
               <span>•</span>
 
-              <a href="#support">Support</a>
+              <Link href="/support" style={{ textDecoration: 'none', color: 'inherit' }}>Support</Link>
 
             </div>
 

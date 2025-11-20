@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import QR from '@/components/QR';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -55,6 +56,7 @@ type ProfileType = 'primary' | 'secondary' | 'family';
 
 export default function CreateProfile() {
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [profileType, setProfileType] = useState<ProfileType>('primary');
   const [makePrimary, setMakePrimary] = useState(true);
   const [firstName, setFirstName] = useState('');
@@ -161,6 +163,9 @@ export default function CreateProfile() {
       if (withPreview) {
         setPreview({ id, firstName, avatarUrl, allergies, dietary: selectedDietary });
         setShowPreview(true);
+      } else {
+        // Redirect to dashboard after saving
+        router.push('/dashboard');
       }
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -569,9 +574,10 @@ export default function CreateProfile() {
                 {saving ? 'Saving...' : 'Save Profile'}
               </button>
               <button
-                onClick={() => {
-                  createProfile(true);
-                  // After saving, could redirect to add another family member
+                onClick={async () => {
+                  await createProfile(false);
+                  // Redirect to create another family member
+                  router.push('/create');
                 }}
                 className="btn btn-accent"
                 style={{ minHeight: '48px' }}
@@ -701,7 +707,8 @@ export default function CreateProfile() {
             </section>
 
             <footer style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button
+              <Link
+                href={`/id/share`}
                 style={{
                   padding: '12px 20px',
                   borderRadius: '12px',
@@ -709,12 +716,15 @@ export default function CreateProfile() {
                   background: '#F8FAFC',
                   color: '#1E3A5F',
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'inline-block'
                 }}
               >
                 Share Profile
-              </button>
+              </Link>
               <button
+                onClick={() => setShowPreview(false)}
                 style={{
                   padding: '12px 20px',
                   borderRadius: '12px',
@@ -727,7 +737,8 @@ export default function CreateProfile() {
               >
                 Edit Profile
               </button>
-              <button
+              <Link
+                href="/create"
                 style={{
                   padding: '12px 20px',
                   borderRadius: '12px',
@@ -735,12 +746,15 @@ export default function CreateProfile() {
                   background: '#B01261',
                   color: 'white',
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'inline-block'
                 }}
               >
                 Create Family Profile
-              </button>
-              <button
+              </Link>
+              <Link
+                href="/dashboard"
                 style={{
                   padding: '12px 20px',
                   borderRadius: '12px',
@@ -748,11 +762,13 @@ export default function CreateProfile() {
                   background: 'white',
                   color: '#1E3A5F',
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'inline-block'
                 }}
               >
-                View Shared Venues
-              </button>
+                View Dashboard
+              </Link>
             </footer>
           </div>
           </div>
