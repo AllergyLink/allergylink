@@ -36,8 +36,7 @@ jobs:
         run: npm run build:gh-pages
         env:
           GITHUB_PAGES: 'true'
-          # If your repo is not at username.github.io, set BASE_PATH
-          # BASE_PATH: '/your-repo-name'
+          BASE_PATH: '/allergylink'
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
