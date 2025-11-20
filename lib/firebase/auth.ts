@@ -49,20 +49,36 @@ export async function sendPhoneVerificationCode(
   verifier?: RecaptchaVerifier
 ): Promise<ConfirmationResult> {
   if (!auth) {
-    throw new Error('Firebase Auth not initialized');
+    const errorMsg = 'Firebase Auth not initialized. Please check your environment variables.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
 
   try {
     const appVerifier = verifier || (window as any).recaptchaVerifier;
     if (!appVerifier) {
-      throw new Error('reCAPTCHA verifier not initialized');
+      throw new Error('reCAPTCHA verifier not initialized. Please refresh the page and try again.');
     }
 
+    console.log('Sending verification code to:', phoneNumber);
     const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+    console.log('Verification code sent successfully');
     return confirmationResult;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending verification code:', error);
-    throw error;
+    
+    // Provide more helpful error messages
+    if (error.code === 'auth/invalid-phone-number') {
+      throw new Error('Invalid phone number format. Please use format: +1234567890');
+    } else if (error.code === 'auth/too-many-requests') {
+      throw new Error('Too many requests. Please try again later.');
+    } else if (error.code === 'auth/captcha-check-failed') {
+      throw new Error('reCAPTCHA verification failed. Please refresh and try again.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to send verification code. Please check your phone number and try again.');
+    }
   }
 }
 
@@ -78,11 +94,23 @@ export async function verifyPhoneCode(
   }
 
   try {
+    console.log('Verifying code...');
     const result = await confirmationResult.confirm(code);
+    console.log('Code verified successfully, user:', result.user.uid);
     return result.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error verifying code:', error);
-    throw error;
+    
+    // Provide more helpful error messages
+    if (error.code === 'auth/invalid-verification-code') {
+      throw new Error('Invalid verification code. Please check the code and try again.');
+    } else if (error.code === 'auth/code-expired') {
+      throw new Error('Verification code has expired. Please request a new code.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to verify code. Please try again.');
+    }
   }
 }
 

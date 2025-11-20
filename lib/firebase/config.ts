@@ -13,20 +13,40 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Validate config
+const isConfigValid = () => {
+  return !!(
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    firebaseConfig.storageBucket &&
+    firebaseConfig.messagingSenderId &&
+    firebaseConfig.appId
+  );
+};
+
 // Initialize Firebase
-let app: FirebaseApp;
-let db: Firestore;
-let auth: Auth;
+let app: FirebaseApp | undefined;
+let db: Firestore | undefined;
+let auth: Auth | undefined;
 
 if (typeof window !== 'undefined') {
   // Only initialize on client side
-  if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
+  if (!isConfigValid()) {
+    console.error('Firebase configuration is missing. Please check your environment variables.');
   } else {
-    app = getApps()[0];
+    try {
+      if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApps()[0];
+      }
+      db = getFirestore(app);
+      auth = getAuth(app);
+    } catch (error) {
+      console.error('Error initializing Firebase:', error);
+    }
   }
-  db = getFirestore(app);
-  auth = getAuth(app);
 }
 
 export { db, auth, app };
