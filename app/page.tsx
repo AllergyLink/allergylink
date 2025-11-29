@@ -1,3 +1,5 @@
+import Logo from '@/components/Logo';
+
 export default function Page() {
   const year = new Date().getFullYear();
 
@@ -15,15 +17,7 @@ export default function Page() {
 
           <div className="al-logo">
 
-            <img 
-              src="/allergylink-logo.png" 
-              alt="AllergyLink" 
-              style={{ 
-                height: 'auto',
-                maxWidth: '200px',
-                width: 'auto'
-              }}
-            />
+            <Logo size={200} showTagline={false} />
 
           </div>
 
