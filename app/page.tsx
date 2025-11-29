@@ -15,19 +15,15 @@ export default function Page() {
 
           <div className="al-logo">
 
-            <span className="al-logo-mark">AL</span>
-
-            <div className="al-logo-text">
-
-              <div className="al-logo-title">ALLERGYLINK</div>
-
-              <div className="al-logo-tagline">
-
-                food allergies shared instantly
-
-              </div>
-
-            </div>
+            <img 
+              src="/allergylink-logo.png" 
+              alt="AllergyLink" 
+              style={{ 
+                height: 'auto',
+                maxWidth: '200px',
+                width: 'auto'
+              }}
+            />
 
           </div>
 
