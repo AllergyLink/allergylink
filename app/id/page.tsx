@@ -1,17 +1,47 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Navigation from '@/components/Navigation';
+import { useRouter } from 'next/navigation';
+import UnifiedNavigation from '@/components/UnifiedNavigation';
 import Footer from '@/components/Footer';
 import QR from '@/components/QR';
+import { getProfile } from '@/lib/storage';
+import type { Profile } from '@/lib/models';
 
 export default function IDHome() {
-  const id = 'ALY-12345678';
-  const profileName = "Madeline's";
+  const router = useRouter();
+  const [profile, setProfile] = useState<Profile | undefined>();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const p = getProfile();
+    if (!p) {
+      router.push('/dashboard');
+      return;
+    }
+    setProfile(p);
+  }, [router]);
+
+  const handleCopy = () => {
+    if (profile) {
+      navigator.clipboard.writeText(profile.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  if (!profile) {
+    return (
+      <main style={{ minHeight: '100dvh', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div>Loading...</div>
+      </main>
+    );
+  }
 
   return (
-    <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
-      <Navigation />
+    <main className="page-shell" style={{ background: 'var(--color-bg)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <UnifiedNavigation />
       
       <div className="container section">
         <div className="card" style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -31,12 +61,14 @@ export default function IDHome() {
             }}>
               M
             </div>
-            <h1>{profileName} Allergy ID</h1>
+            <h1>{profile.firstName}'s Allergy ID</h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
-              <span className="chip chip-primary">Peanut</span>
-              <span className="chip chip-primary">Dairy</span>
-              <span className="chip chip-primary">Soy</span>
-              <span className="chip chip-success">Vegetarian</span>
+              {profile.allergies.slice(0, 3).map((a) => (
+                <span key={a.name} className="chip chip-primary">{a.name}</span>
+              ))}
+              {profile.dietary.slice(0, 2).map((d) => (
+                <span key={d} className="chip chip-success">{d}</span>
+              ))}
             </div>
           </div>
 
@@ -48,21 +80,18 @@ export default function IDHome() {
             marginBottom: '24px',
             border: '1px solid var(--color-border)'
           }}>
-            <QR value={`https://id.allergylink.net/${id}`} size={200} />
+            <QR value={`https://id.allergylink.net/${profile.id}`} size={200} />
             <p className="text-muted" style={{ marginTop: '16px', marginBottom: 0, fontFamily: 'monospace', fontSize: '1rem' }}>
-              {id}
+              {profile.id}
             </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
             <button
               className="btn btn-primary btn-full"
-              onClick={() => {
-                navigator.clipboard.writeText(id);
-                alert('ID copied to clipboard!');
-              }}
+              onClick={handleCopy}
             >
-              Copy ID
+              {copied ? '✓ Copied!' : 'Copy ID'}
             </button>
             <button className="btn btn-secondary btn-full">
               Save to Wallet

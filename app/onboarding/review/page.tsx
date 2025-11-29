@@ -1,13 +1,12 @@
-import { Button } from '@/components/ui/Button';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
-  return (
-    <main className="container col">
-      <h1 className="title">Review & Generate Allergy ID</h1>
-      <div className="card col">
-        <p className="muted">Summary cards with Edit links...</p>
-      </div>
-      <Button>Generate My ID</Button>
-    </main>
-  );
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/onboarding?step=5');
+  }, [router]);
+  return null;
 }

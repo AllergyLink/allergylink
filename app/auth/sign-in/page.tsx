@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Navigation from '@/components/Navigation';
+import { useRouter } from 'next/navigation';
+import UnifiedNavigation from '@/components/UnifiedNavigation';
 import Footer from '@/components/Footer';
+import { getProfile, load } from '@/lib/storage';
 
 export default function SignIn() {
+  const router = useRouter();
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
@@ -22,7 +25,15 @@ export default function SignIn() {
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
     if (code === '123456') {
-      window.location.href = '/dashboard';
+      // Check if user has a profile
+      const state = load();
+      const hasProfile = state.primaryId && state.profiles[state.primaryId];
+      
+      if (hasProfile) {
+        router.push('/dashboard');
+      } else {
+        router.push('/onboarding');
+      }
     } else {
       alert('Incorrect code. Demo code is 123456');
     }
@@ -30,7 +41,7 @@ export default function SignIn() {
 
   return (
     <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
-      <Navigation />
+      <UnifiedNavigation />
       
       <div className="container" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 20px' }}>
         <div className="card" style={{ maxWidth: '440px', width: '100%' }}>
