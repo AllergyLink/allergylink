@@ -89,7 +89,7 @@ export default function Page() {
 
                 <span>✔</span>
 
-                <span>No app. No password. Just one link.</span>
+                <span>No App. No Passwords. No payment.</span>
 
               </div>
 
