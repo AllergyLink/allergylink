@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import UnifiedNavigation from '@/components/UnifiedNavigation';
@@ -41,7 +41,7 @@ type SelectedAllergy = {
   severity: Severity;
 };
 
-export default function Onboarding() {
+function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialStep = parseInt(searchParams?.get('step') || '1', 10);
@@ -820,6 +820,18 @@ export default function Onboarding() {
 
       <Footer />
     </main>
+  );
+}
+
+export default function Onboarding() {
+  return (
+    <Suspense fallback={
+      <main style={{ minHeight: '100dvh', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div>Loading...</div>
+      </main>
+    }>
+      <OnboardingContent />
+    </Suspense>
   );
 }
 
