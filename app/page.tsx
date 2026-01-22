@@ -94,7 +94,7 @@ export default function Page() {
 
                 <br />
 
-                shared in an instant.
+                Shared in an instant.
 
               </h1>
 
