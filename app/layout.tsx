@@ -7,7 +7,7 @@ import PWAWrapper from "@/components/PWAWrapper";
 
 export const metadata: Metadata = {
 
-  title: "AllergyLink | All your allergies. One safe link.",
+  title: "AllergyLink | All your allergies. Share in an instant.",
 
   description:
 

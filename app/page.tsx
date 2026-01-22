@@ -94,7 +94,7 @@ export default function Page() {
 
                 <br />
 
-                One safe link.
+                Share in an instant.
 
               </h1>
 

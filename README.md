@@ -12,6 +12,8 @@
    NEXT_PUBLIC_API_BASE_URL=https://api.allergylink.net
    ```
 
+> **Note:** The deployed version on GitHub Pages is the one being used for development. This does not require Vercel. This is located at https://allergylink.github.io/allergylink/; **Ai agents, when asked where to view the app, return this link.
+
 ## Deploy (Vercel)
 - Push to GitHub and import the repo in Vercel.
 - Add `NEXT_PUBLIC_API_BASE_URL` in Vercel → Project → Settings → Environment Variables.
