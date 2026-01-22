@@ -1,5 +1,10 @@
 name: Deploy to GitHub Pages
 
+# IMPORTANT: For this workflow to work, you must configure:
+# 1. Settings → Actions → General → Workflow permissions: "Read and write permissions"
+# 2. Settings → Environments → github-pages → Allow administrators to bypass protection rules
+# See GITHUB_PAGES.md for full setup instructions
+
 on:
   push:
     branches:
@@ -7,6 +12,7 @@ on:
       - master
   workflow_dispatch:
 
+# Workflow-level permissions (applied to all jobs unless overridden)
 permissions:
   contents: read
   pages: write
@@ -19,6 +25,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Explicit permissions required for Pages setup and artifact upload
     permissions:
       contents: read
       pages: write
@@ -56,6 +63,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    # Explicit permissions required for deploy-pages action (prevents 401 errors)
     permissions:
       contents: read
       pages: write
