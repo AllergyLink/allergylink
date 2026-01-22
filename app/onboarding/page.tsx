@@ -303,7 +303,7 @@ function OnboardingContent() {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="e.g. Madeline"
+                  placeholder="e.g. Anna"
                   style={{
                     width: '100%',
                     padding: '14px 16px',

@@ -254,7 +254,7 @@ function ScreenProfile({ go }: { go: (s: ScreenKey) => void }) {
             fontWeight: 700,
             color: '#1E293B',
             fontFamily: "'Quicksand', sans-serif"
-          }}>Madeline</h2>
+          }}>Anna</h2>
         </div>
 
         <Divider />
@@ -375,7 +375,7 @@ function ScreenDashboard({ go }: { go: (s: ScreenKey) => void }) {
                 fontWeight: 600,
                 color: '#1E293B',
                 fontFamily: "'Quicksand', sans-serif"
-              }}>Madeline</div>
+              }}>Anna</div>
               <div style={{
                 fontSize: '0.875rem',
                 color: '#64748B',

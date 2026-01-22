@@ -148,11 +148,11 @@ export default function Page() {
 
               <div className="al-profile-header">
 
-                <div className="al-avatar">M</div>
+                <div className="al-avatar">A</div>
 
                 <div>
 
-                  <div className="al-profile-name">Madeline</div>
+                  <div className="al-profile-name">Anna</div>
 
                   <div className="al-profile-allergies">
 
@@ -354,11 +354,11 @@ export default function Page() {
 
                     <div className="al-profile-row-left">
 
-                      <div className="al-mini-avatar">M</div>
+                      <div className="al-mini-avatar">A</div>
 
                       <div>
 
-                        <div className="al-profile-row-name">Madeline</div>
+                        <div className="al-profile-row-name">Anna</div>
 
                         <div className="al-profile-row-allergies">
 
