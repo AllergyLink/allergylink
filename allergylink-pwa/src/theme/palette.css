@@ -1,0 +1,19 @@
+/**
+ * AllergyLink UI palette — inspired by the allergen icon mock
+ * (muted, earthy tones: egg, crustacean, milk, nuts, mollusc, sesame, corn, soya)
+ */
+:root {
+  --al-egg: #e09045;
+  --al-crustacean: #e85d4c;
+  --al-milk: #42a5e8;
+  --al-nuts: #b8956e;
+  --al-mollusc: #c4563f;
+  --al-sesame: #5fa3a2;
+  --al-corn: #e5c04a;
+  --al-soya: #72a06a;
+  /* App chrome / primary actions — deep blue aligned with mock frame */
+  --al-frame: #4a7dbc;
+  --al-primary: #355f9a;
+  --al-primary-hover: #4a7ec8;
+  --al-primary-active: #2d4f82;
+}

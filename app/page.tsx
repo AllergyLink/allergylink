@@ -1,10 +1,17 @@
 'use client';
 
+import { useEffect } from 'react';
 import Logo from '@/components/Logo';
 import Link from 'next/link';
 import UnifiedNavigation from '@/components/UnifiedNavigation';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/welcome');
+  }, [router]);
+
   const year = new Date().getFullYear();
 
 

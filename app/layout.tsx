@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
 import PWAWrapper from "@/components/PWAWrapper";
+import { AppProvider } from "@/components/AppProvider";
 
 
 
@@ -74,7 +75,7 @@ export default function RootLayout({
     <html lang="en">
 
       <body className="al-body">
-        {children}
+        <AppProvider>{children}</AppProvider>
         <PWAWrapper />
       </body>
 
