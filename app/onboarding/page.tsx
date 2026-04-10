@@ -56,7 +56,8 @@ function OnboardingContent() {
   const [selectedAllergies, setSelectedAllergies] = useState<Record<string, SelectedAllergy>>({});
   const [otherAllergies, setOtherAllergies] = useState<Array<{ name: string; severity: Severity }>>([]);
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
-  
+  const [previewAllergyLinkId] = useState(() => newAllergyLinkId());
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-save draft to localStorage
@@ -752,7 +753,7 @@ function OnboardingContent() {
                   }}
                 >
                   <div style={{ marginBottom: '12px' }}>
-                    <QR value={`https://id.allergylink.net/${newId()}`} size={150} />
+                    <QR value={`https://id.allergylink.net/${previewAllergyLinkId}`} size={150} />
                   </div>
                   <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
                     Your AllergyLink ID will be generated when you complete
