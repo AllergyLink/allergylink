@@ -7,7 +7,9 @@ import UnifiedNavigation from '@/components/UnifiedNavigation';
 import Footer from '@/components/Footer';
 import QR from '@/components/QR';
 import { TOP_ALLERGIES, DIETARY } from '@/lib/constants';
-import { newId, upsertProfile, load } from '@/lib/storage';
+import { upsertProfile } from '@/lib/storage';
+import { newAllergyLinkId, uuid } from '@/lib/store/ids';
+import { supabase } from '@/lib/supabase';
 import type { Severity } from '@/lib/models';
 
 const TOTAL_STEPS = 5;
@@ -183,21 +185,47 @@ function OnboardingContent() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const allAllergies = [
       ...Object.values(selectedAllergies),
       ...otherAllergies.filter((o) => o.name.trim() !== ''),
     ];
 
-    const profileId = newId();
-    upsertProfile({
-      id: profileId,
-      firstName,
-      avatarUrl,
-      allergies: allAllergies,
-      dietary: selectedDietary,
-      updatedAt: new Date().toISOString(),
-    });
+    // Get the current authenticated user
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const userId = authUser?.id ?? uuid();
+
+    const now = new Date().toISOString();
+    const profile = {
+      id: uuid(),
+      userId,
+      type: 'primary' as const,
+      isMinor: false,
+      name: firstName,
+      avatar: undefined,
+      photoDataUrl: avatarUrl,
+      allergies: allAllergies.map((a) => ({
+        category: 'Other' as const,
+        name: a.name,
+        isAnaphylactic: a.severity === 'anaphylactic',
+        crossContaminationOK: a.severity === 'cross-ok',
+        image: allergySymbols[a.name] || '🍽️',
+      })),
+      dietaryRestrictions: selectedDietary as Array<'Vegan' | 'Vegetarian' | 'Halal' | 'Kosher' | 'Gluten-Free' | 'Custom'>,
+      dietaryCustom: undefined,
+      emergencyContact: {},
+      guardians: [],
+      preferences: {
+        promotionsDigital: false,
+        promotionsSampleBox: false,
+        translationsEnabled: false,
+      },
+      allergyLinkId: newAllergyLinkId(),
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await upsertProfile(profile);
 
     // Clear draft
     localStorage.removeItem('allergylink-onboarding-draft');
@@ -788,7 +816,7 @@ function OnboardingContent() {
           ) : (
             <button
               type="button"
-              onClick={handleComplete}
+              onClick={() => void handleComplete()}
               disabled={!canProceed()}
               style={{
                 padding: '14px 32px',

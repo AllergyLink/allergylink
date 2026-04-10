@@ -2,41 +2,63 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Navigation from '@/components/Navigation';
+import { useRouter } from 'next/navigation';
+import UnifiedNavigation from '@/components/UnifiedNavigation';
 import Footer from '@/components/Footer';
+import { sendPhoneOtp, verifyPhoneOtp } from '@/lib/auth';
 
 export default function SignUp() {
+  const router = useRouter();
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSendCode = (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone) {
+    if (!phone) return;
+    setLoading(true);
+    setError('');
+    const err = await sendPhoneOtp(phone);
+    setLoading(false);
+    if (err) {
+      setError(err);
+    } else {
       setCodeSent(true);
-      alert('Demo: Code sent! Use 123456 to verify.');
     }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (code === '123456') {
-      window.location.href = '/create';
-    } else {
-      alert('Incorrect code. Demo code is 123456');
+    setLoading(true);
+    setError('');
+    const err = await verifyPhoneOtp(phone, code);
+    setLoading(false);
+    if (err) {
+      setError(err);
+      return;
     }
+    // New sign-up → go straight to onboarding
+    router.push('/onboarding');
   };
 
   return (
     <main className="page-shell" style={{ background: 'var(--color-bg)' }}>
-      <Navigation />
-      
+      <UnifiedNavigation />
+
       <div className="container" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 20px' }}>
         <div className="card" style={{ maxWidth: '440px', width: '100%' }}>
           <h1>Create Account</h1>
           <p className="text-muted" style={{ marginBottom: '32px' }}>
-            No username or password required. No credit card needed. Just enter your phone number to create an account.
+            No username or password required. No credit card needed. Just enter your phone number to get started.
           </p>
+
+          {error && (
+            <div style={{ marginBottom: '16px', padding: '12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', fontSize: '0.875rem' }}>
+              {error}
+            </div>
+          )}
 
           {!codeSent ? (
             <form onSubmit={handleSendCode}>
@@ -50,8 +72,8 @@ export default function SignUp() {
                 required
                 style={{ marginBottom: '24px' }}
               />
-              <button type="submit" className="btn btn-primary btn-full">
-                Send one-time code
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+                {loading ? 'Sending…' : 'Send one-time code'}
               </button>
             </form>
           ) : (
@@ -60,6 +82,7 @@ export default function SignUp() {
               <input
                 id="code"
                 type="text"
+                inputMode="numeric"
                 placeholder="123456"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
@@ -67,12 +90,12 @@ export default function SignUp() {
                 required
                 style={{ marginBottom: '24px', textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5em' }}
               />
-              <button type="submit" className="btn btn-primary btn-full" style={{ marginBottom: '16px' }}>
-                Verify & Continue
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ marginBottom: '16px' }}>
+                {loading ? 'Verifying…' : 'Verify & Continue'}
               </button>
               <button
                 type="button"
-                onClick={() => setCodeSent(false)}
+                onClick={() => { setCodeSent(false); setError(''); }}
                 className="btn btn-ghost btn-full btn-sm"
               >
                 Change phone number

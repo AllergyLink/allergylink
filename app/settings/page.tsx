@@ -1,25 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import UnifiedNavigation from '@/components/UnifiedNavigation';
 import Footer from '@/components/Footer';
-import { load, getProfile } from '@/lib/storage';
+import { useApp } from '@/components/AppProvider';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState('');
+  const { state, signOut } = useApp();
+  const user = state.session?.verified ? state.users[state.session.userId] : undefined;
 
-  useEffect(() => {
-    // In a real app, you'd load this from user data
-    const state = load();
-    setPhone(state.phone || '');
-  }, []);
-
-  const handleSignOut = () => {
-    // In a real app, you'd clear auth tokens
-    localStorage.removeItem('allergylink-demo');
+  const handleSignOut = async () => {
+    await signOut();
     router.push('/');
   };
 
@@ -42,7 +36,7 @@ export default function SettingsPage() {
           }}
         >
           <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '20px' }}>Account</h2>
-          
+
           <div style={{ marginBottom: '20px' }}>
             <label
               style={{
@@ -57,7 +51,7 @@ export default function SettingsPage() {
             </label>
             <input
               type="tel"
-              value={phone}
+              value={user?.phoneNumber ?? ''}
               readOnly
               style={{
                 width: '100%',
@@ -153,7 +147,7 @@ export default function SettingsPage() {
         </div>
 
         <button
-          onClick={handleSignOut}
+          onClick={() => void handleSignOut()}
           style={{
             width: '100%',
             padding: '14px 24px',
