@@ -49,7 +49,7 @@ export default function DashboardPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-10">
         <p className="text-slate-700">No profile found. Create your profile to continue.</p>
-        <Link href="/create-profile" className="mt-4 inline-block">
+        <Link href="/onboarding" className="mt-4 inline-block">
           <Button>Create profile</Button>
         </Link>
       </div>
@@ -129,7 +129,7 @@ export default function DashboardPage() {
       <section className="mt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-500">Family</h2>
-          <Link href="/create-profile" className="text-xs font-semibold text-[color:var(--color-primary)]">
+          <Link href="/onboarding" className="text-xs font-semibold text-[color:var(--color-primary)]">
             + Add member
           </Link>
         </div>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
           ) : (
             <Card>
               <p className="text-sm text-slate-700">No family profiles yet.</p>
-              <Link href="/create-profile" className="mt-3 inline-block">
+              <Link href="/onboarding" className="mt-3 inline-block">
                 <Button variant="secondary">Add family members</Button>
               </Link>
             </Card>
