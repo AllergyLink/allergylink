@@ -45,7 +45,7 @@ export default function IDPage() {
           <p style={{ color: 'var(--color-text-muted)', marginBottom: '16px' }}>
             No profile found. Create one first.
           </p>
-          <Link href="/create-profile">
+          <Link href="/onboarding">
             <Button>Create Profile</Button>
           </Link>
         </div>

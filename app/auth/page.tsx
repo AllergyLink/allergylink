@@ -49,7 +49,7 @@ export default function AuthPage() {
       return
     }
     const profiles = await listProfiles()
-    router.push(profiles.length > 0 ? '/dashboard' : '/create-profile')
+    router.push(profiles.length > 0 ? '/dashboard' : '/onboarding')
   }
 
   return (
