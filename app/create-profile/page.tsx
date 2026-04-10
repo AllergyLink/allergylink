@@ -1,8 +1,5 @@
-'use client'
-
-import { CreateProfileWizard } from '@/components/profile/CreateProfileWizard'
+import { redirect } from 'next/navigation'
 
 export default function CreateProfilePage() {
-  return <CreateProfileWizard />
+  redirect('/onboarding')
 }
-
