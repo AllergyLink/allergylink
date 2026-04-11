@@ -40,7 +40,7 @@ export default function WelcomePage() {
               width={1024}
               height={524}
               priority
-              className="h-10 w-auto object-contain"
+              className="h-10 w-auto max-w-[160px] object-contain"
             />
             <p className="hidden text-sm text-slate-600 sm:block">
               Instantly share your allergy &amp; dietary profile—anywhere you go.
