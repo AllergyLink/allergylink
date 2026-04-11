@@ -3,7 +3,14 @@ import type { UUID } from '@/lib/types'
 const ALPHANUM = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
 export function uuid(): UUID {
-  return `id_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID() as UUID
+  }
+  // fallback for environments without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  }) as UUID
 }
 
 export function newAllergyLinkId(): string {
