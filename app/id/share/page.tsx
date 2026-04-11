@@ -8,7 +8,7 @@ import QR from '@/components/QR';
 export default function Share() {
   const [shareMethod, setShareMethod] = useState<'qr' | 'link' | 'text'>('qr');
   const id = 'ALY-12345678';
-  const shareUrl = `https://id.allergylink.net/${id}`;
+  const shareUrl = `https://allergylink.vercel.app/p/${id}`;
 
   const handleShare = (method: 'messages' | 'email') => {
     if (method === 'messages') {

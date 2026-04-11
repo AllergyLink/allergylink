@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useApp } from '@/components/AppProvider'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import type { Profile } from '@/lib/types'
-import { ALLERGEN_CATEGORIES } from '@/lib/store/allergens'
+import { ALLERGEN_CATEGORIES, ALLERGEN_SEED } from '@/lib/store/allergens'
 
 export default function InternalProfilePage() {
   const params = useParams<{ id: string }>()
@@ -17,8 +17,9 @@ export default function InternalProfilePage() {
   const id = params.id
   const profile = state.profiles[id]
 
-  const [expanded, setExpanded] = useState<string>('Dairy')
+  const [expanded, setExpanded] = useState<string>('Nuts')
   const [draft, setDraft] = useState<Profile | null>(profile ?? null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isMinor = draft?.isMinor ?? false
   const approval = state.minorApprovals[id]
@@ -64,6 +65,47 @@ export default function InternalProfilePage() {
       <Card className="mt-6 space-y-4">
         <p className="text-sm font-semibold text-slate-900">Edit Profile</p>
 
+        {/* Photo upload */}
+        <div className="flex items-center gap-4">
+          <div
+            className="flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[color:var(--color-primary)] to-[color:var(--color-accent)] text-2xl font-bold text-white"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {draft?.photoDataUrl ? (
+              <img src={draft.photoDataUrl} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              (draft?.name?.charAt(0).toUpperCase() ?? '?')
+            )}
+          </div>
+          <div className="space-y-1">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = () => setDraft((p) => p ? { ...p, photoDataUrl: typeof reader.result === 'string' ? reader.result : undefined } : p)
+                reader.readAsDataURL(file)
+              }}
+            />
+            <Button type="button" variant="secondary" className="!min-h-9 !px-3 text-xs" onClick={() => fileInputRef.current?.click()}>
+              Change photo
+            </Button>
+            {draft?.photoDataUrl && (
+              <button
+                type="button"
+                className="block text-xs text-slate-500 hover:text-rose-600"
+                onClick={() => setDraft((p) => p ? { ...p, photoDataUrl: undefined } : p)}
+              >
+                Remove photo
+              </button>
+            )}
+          </div>
+        </div>
+
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-slate-800">Name</span>
           <input
@@ -74,22 +116,67 @@ export default function InternalProfilePage() {
         </label>
       </Card>
 
+      <Card className="mt-4 space-y-4">
+        <p className="text-sm font-semibold text-slate-900">Emergency contact</p>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-800">Name</span>
+          <input
+            value={draft?.emergencyContact?.name ?? ''}
+            onChange={(e) => setDraft((p) => p ? { ...p, emergencyContact: { ...(p.emergencyContact ?? {}), name: e.target.value } } : p)}
+            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-800">Phone</span>
+          <input
+            value={draft?.emergencyContact?.phone ?? ''}
+            onChange={(e) => setDraft((p) => p ? { ...p, emergencyContact: { ...(p.emergencyContact ?? {}), phone: e.target.value } } : p)}
+            inputMode="tel"
+            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base"
+          />
+        </label>
+      </Card>
+
       <section className="mt-6 space-y-3">
         <p className="text-sm font-semibold text-slate-900">Allergies</p>
         <Card className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            {ALLERGEN_CATEGORIES.map((c) => (
+            {ALLERGEN_CATEGORIES.map((c) => {
+              const count = (draft?.allergies ?? []).filter((a) => a.category === c.key).length
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                    expanded === c.key
+                      ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
+                      : 'border-slate-200 bg-white text-slate-700'
+                  }`}
+                  onClick={() => setExpanded(c.key)}
+                >
+                  {c.label}{count > 0 ? ` (${count})` : ''}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Add allergens from catalog */}
+          <div className="space-y-2">
+            {ALLERGEN_SEED.filter((s) => s.category === expanded && !(draft?.allergies ?? []).some((a) => a.name === s.name)).map((seed) => (
               <button
-                key={c.key}
+                key={seed.name}
                 type="button"
-                className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                  expanded === c.key
-                    ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
-                    : 'border-slate-200 bg-white text-slate-700'
-                }`}
-                onClick={() => setExpanded(c.key)}
+                className="flex w-full items-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm hover:border-[color:var(--color-primary)]"
+                onClick={() =>
+                  setDraft((p) => p ? {
+                    ...p,
+                    allergies: [...p.allergies, { category: seed.category, name: seed.name, image: seed.image, isAnaphylactic: false, crossContaminationOK: true }],
+                  } : p)
+                }
               >
-                {c.label}
+                <span className="text-xl">{seed.image}</span>
+                <span className="flex-1 text-slate-700">{seed.name}</span>
+                <span className="text-[color:var(--color-primary)]">+</span>
               </button>
             ))}
           </div>
@@ -149,31 +236,42 @@ export default function InternalProfilePage() {
         </Card>
       </section>
 
-      <Card className="mt-6 space-y-4">
-        <p className="text-sm font-semibold text-slate-900">Emergency contact</p>
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">Name</span>
-          <input
-            value={draft?.emergencyContact?.name ?? ''}
-            onChange={(e) =>
+      <Card className="mt-4 space-y-3">
+        <p className="text-sm font-semibold text-slate-900">Preferences</p>
+        <label className="flex cursor-pointer items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-slate-800">🌐 Allergy Translations</p>
+            <p className="text-xs text-slate-500">Show allergens translated in 6 languages on dashboard</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={draft?.preferences?.translationsEnabled ?? false}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+              draft?.preferences?.translationsEnabled
+                ? 'bg-[color:var(--color-primary)]'
+                : 'bg-slate-200'
+            }`}
+            onClick={() =>
               setDraft((p) =>
-                p ? { ...p, emergencyContact: { ...(p.emergencyContact ?? {}), name: e.target.value } } : p,
+                p
+                  ? {
+                      ...p,
+                      preferences: {
+                        ...(p.preferences ?? { promotionsDigital: false, promotionsSampleBox: false, translationsEnabled: false }),
+                        translationsEnabled: !(p.preferences?.translationsEnabled ?? false),
+                      },
+                    }
+                  : p,
               )
             }
-            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-800">Phone</span>
-          <input
-            value={draft?.emergencyContact?.phone ?? ''}
-            onChange={(e) =>
-              setDraft((p) =>
-                p ? { ...p, emergencyContact: { ...(p.emergencyContact ?? {}), phone: e.target.value } } : p,
-              )
-            }
-            className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base"
-          />
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                draft?.preferences?.translationsEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </label>
       </Card>
 

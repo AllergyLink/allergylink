@@ -7,6 +7,7 @@ const seed: AppState = {
   profiles: {},
   shareSessions: {},
   minorApprovals: {},
+  favoriteVenues: [],
 }
 
 export function loadState(): AppState {

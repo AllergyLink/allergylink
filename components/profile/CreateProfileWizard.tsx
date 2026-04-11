@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { useApp } from '@/components/AppProvider'
 import type { DietaryRestriction, Guardian, Profile } from '@/lib/types'
-import { ALLERGEN_CATEGORIES } from '@/lib/store/allergens'
+import { ALLERGEN_CATEGORIES, ALLERGEN_SEED } from '@/lib/store/allergens'
 import { AvatarBuilder } from './AvatarBuilder'
 
 type Step =
@@ -19,7 +19,7 @@ type Step =
   | 'guardians'
   | 'complete'
 
-const STEPS: { key: Step; label: string }[] = [
+const ALL_STEPS: { key: Step; label: string }[] = [
   { key: 'identity', label: 'Identity' },
   { key: 'allergies', label: 'Food Allergies' },
   { key: 'dietary', label: 'Dietary' },
@@ -30,6 +30,8 @@ const STEPS: { key: Step; label: string }[] = [
   { key: 'complete', label: 'Complete' },
 ]
 
+const SECONDARY_STEPS: Step[] = ['identity', 'allergies', 'dietary', 'emergency', 'promotions', 'complete']
+
 const DIETARY: DietaryRestriction[] = [
   'Vegan',
   'Vegetarian',
@@ -39,10 +41,10 @@ const DIETARY: DietaryRestriction[] = [
   'Custom',
 ]
 
-function Stepper({ index }: { index: number }) {
+function Stepper({ index, steps }: { index: number; steps: { key: Step; label: string }[] }) {
   return (
     <div className="flex items-center gap-2" aria-label="Progress">
-      {STEPS.map((s, i) => (
+      {steps.map((s, i) => (
         <div
           key={s.key}
           className={`h-2 flex-1 rounded-full ${
@@ -272,18 +274,24 @@ function GuardianEditor({
   )
 }
 
-export function CreateProfileWizard() {
+export function CreateProfileWizard({ profileType = 'primary' }: { profileType?: Profile['type'] }) {
   const router = useRouter()
   const { state, createProfileDraft, upsertProfile, createGuardian, verifyGuardian } = useApp()
 
   const user = state.session?.verified ? state.users[state.session.userId] : undefined
+
+  const STEPS = profileType === 'secondary'
+    ? ALL_STEPS.filter((s) => SECONDARY_STEPS.includes(s.key))
+    : ALL_STEPS
+
   const [stepIndex, setStepIndex] = useState(0)
   const step = STEPS[stepIndex]!.key
 
   const [primary, setPrimary] = useState<Profile>(() =>
-    user ? createProfileDraft(user.id, user.firstName) : createProfileDraft('unknown', 'User'),
+    user ? createProfileDraft(user.id, user.firstName, profileType) : createProfileDraft('unknown', 'User', profileType),
   )
-  const [expandedCategory, setExpandedCategory] = useState<string | null>('Dairy')
+  const [expandedCategory, setExpandedCategory] = useState<string | null>('Nuts')
+  const [customAllergenName, setCustomAllergenName] = useState('')
   const [family, setFamily] = useState<Profile[]>([])
 
   const minorsNeedingGuardians = useMemo(
@@ -313,7 +321,7 @@ export function CreateProfileWizard() {
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="space-y-4">
-        <Stepper index={stepIndex} />
+        <Stepper index={stepIndex} steps={STEPS} />
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-950">Create Profile</h1>
           <p className="mt-2 text-sm text-slate-600">{STEPS[stepIndex]!.label}</p>
@@ -373,37 +381,109 @@ export function CreateProfileWizard() {
             <Card className="space-y-3">
               <p className="text-sm font-semibold text-slate-900">Categories</p>
               <div className="flex flex-wrap gap-2">
-                {ALLERGEN_CATEGORIES.map((c) => (
-                  <button
-                    key={c.key}
-                    type="button"
-                    className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                      expandedCategory === c.key
-                        ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
-                        : 'border-slate-200 bg-white text-slate-700'
-                    }`}
-                    onClick={() => setExpandedCategory(c.key)}
-                  >
-                    {c.label}
-                  </button>
-                ))}
+                {ALLERGEN_CATEGORIES.map((c) => {
+                  const count = primary.allergies.filter((a) => a.category === c.key).length
+                  return (
+                    <button
+                      key={c.key}
+                      type="button"
+                      className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                        expandedCategory === c.key
+                          ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary-soft)] text-[color:var(--color-primary)]'
+                          : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                      onClick={() => setExpandedCategory(c.key)}
+                    >
+                      {c.label}{count > 0 ? ` (${count})` : ''}
+                    </button>
+                  )
+                })}
               </div>
               <p className="text-xs text-slate-500">
-                Tap a category to expand. Set anaphylaxis and cross-contamination rules per allergen.
+                Tap a category, then add allergens. Set anaphylaxis and cross-contamination per item.
               </p>
             </Card>
 
+            {/* Catalog: allergens available to add */}
+            <div className="space-y-2">
+              {ALLERGEN_SEED.filter((s) => s.category === expandedCategory).map((seed) => {
+                const added = primary.allergies.some((a) => a.name === seed.name)
+                return added ? null : (
+                  <button
+                    key={seed.name}
+                    type="button"
+                    className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-soft)]"
+                    onClick={() =>
+                      setPrimary({
+                        ...primary,
+                        allergies: [
+                          ...primary.allergies,
+                          { category: seed.category, name: seed.name, image: seed.image, isAnaphylactic: false, crossContaminationOK: true },
+                        ],
+                      })
+                    }
+                  >
+                    <span className="text-2xl">{seed.image}</span>
+                    <span className="flex-1 text-sm font-medium text-slate-800">{seed.name}</span>
+                    <span className="text-lg text-[color:var(--color-primary)]">+</span>
+                  </button>
+                )
+              })}
+
+              {/* Custom allergen for Other category */}
+              {expandedCategory === 'Other' && (
+                <div className="flex gap-2">
+                  <input
+                    value={customAllergenName}
+                    onChange={(e) => setCustomAllergenName(e.target.value)}
+                    placeholder="Custom allergen name"
+                    className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="shrink-0"
+                    onClick={() => {
+                      const name = customAllergenName.trim()
+                      if (!name || primary.allergies.some((a) => a.name === name)) return
+                      setPrimary({
+                        ...primary,
+                        allergies: [
+                          ...primary.allergies,
+                          { category: 'Other', name, image: '⚠️', isAnaphylactic: false, crossContaminationOK: true },
+                        ],
+                      })
+                      setCustomAllergenName('')
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Configured allergens in this category */}
             <div className="space-y-3">
               {primary.allergies
                 .filter((a) => a.category === expandedCategory)
                 .map((a) => (
-                  <AllergenRow
-                    key={a.name}
-                    p={primary}
-                    allergenName={a.name}
-                    image={a.image}
-                    onChange={setPrimary}
-                  />
+                  <div key={a.name} className="relative">
+                    <AllergenRow
+                      p={primary}
+                      allergenName={a.name}
+                      image={a.image}
+                      onChange={setPrimary}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-3 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 hover:bg-rose-100 hover:text-rose-700"
+                      onClick={() =>
+                        setPrimary({ ...primary, allergies: primary.allergies.filter((x) => x.name !== a.name) })
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
                 ))}
             </div>
           </div>

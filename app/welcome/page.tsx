@@ -69,15 +69,53 @@ export default function WelcomePage() {
             </div>
           </section>
 
-          <section className="relative mx-auto w-full max-w-lg">
-            {/* Left card + venue badges */}
-            <div className="relative">
+          {/* Hero visual — stacked on mobile, overlapping on desktop */}
+          <section className="mx-auto w-full max-w-lg">
+            {/* Mobile: simple stacked cards */}
+            <div className="flex flex-col gap-4 md:hidden">
+              <Card className="p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                  Profile preview
+                </p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[color:var(--color-primary)] to-[color:var(--color-accent)] text-sm font-bold text-white" aria-hidden>
+                    M
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Madeline</p>
+                    <p className="text-sm text-slate-600">Peanuts 🥜 · Shellfish 🦐 · Gluten 🌾</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {VENUE_BADGES.slice(0, 4).map((b) => (
+                    <span key={b} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">{b}</span>
+                  ))}
+                </div>
+              </Card>
+              <Card className="p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                  Dashboard preview
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {RIGHT_CALLOUTS.map((c) => (
+                    <div key={c} className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-center text-xs font-semibold text-slate-700">
+                      {c}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            {/* Desktop: overlapping layout */}
+            <div className="relative hidden md:block" style={{ minHeight: '420px' }}>
               <Card className="relative z-20 w-[92%] max-w-sm p-5">
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                   Profile preview
                 </p>
                 <div className="mt-3 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-slate-200" aria-hidden />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[color:var(--color-primary)] to-[color:var(--color-accent)] text-sm font-bold text-white" aria-hidden>
+                    M
+                  </div>
                   <div>
                     <p className="font-semibold text-slate-900">Madeline</p>
                     <p className="text-sm text-slate-600">Peanuts 🥜 · Shellfish 🦐 · Gluten 🌾</p>
@@ -94,7 +132,7 @@ export default function WelcomePage() {
               </Card>
 
               {/* Dashed connectors + circular badges */}
-              <div className="pointer-events-none absolute -inset-6 z-10 hidden md:block">
+              <div className="pointer-events-none absolute -inset-6 z-10">
                 <div className="absolute left-[-6px] top-[18px] h-[360px] w-[360px] rounded-full border border-dashed border-slate-300/70" />
                 {VENUE_BADGES.map((b, i) => (
                   <div

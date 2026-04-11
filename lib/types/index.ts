@@ -82,8 +82,17 @@ export type ShareSession = {
   id: UUID
   profileId: UUID
   method: ShareMethod
+  venueName?: string
+  venueType?: string
   approved: boolean
   timestamp: string
+}
+
+export type FavoriteVenue = {
+  id: UUID
+  name: string
+  type?: string
+  savedAt: string
 }
 
 export type Address = {
@@ -112,5 +121,6 @@ export type AppState = {
   profiles: Record<UUID, Profile>
   shareSessions: Record<UUID, ShareSession>
   minorApprovals: Record<UUID, { approvedByGuardianId: UUID; approvedAt: string }>
+  favoriteVenues: FavoriteVenue[]
 }
 

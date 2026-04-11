@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { AppState, Guardian, Profile, ShareMethod, ShareSession, User, UUID } from '@/lib/types'
+import type { AppState, FavoriteVenue, Guardian, Profile, ShareMethod, ShareSession, User, UUID } from '@/lib/types'
 import { loadState, saveState } from '@/lib/store/storage'
 import { newAllergyLinkId, uuid } from '@/lib/store/ids'
 import { buildAllergies } from '@/lib/store/allergens'
@@ -16,8 +16,10 @@ type Ctx = {
   state: AppState
   signInVerified: (phoneNumber: string, firstName: string) => UUID
   signOut: () => void
-  createProfileDraft: (userId: UUID, name: string) => Profile
+  createProfileDraft: (userId: UUID, name: string, type?: Profile['type']) => Profile
   upsertProfile: (p: Profile) => void
+  addFavoriteVenue: (v: Omit<FavoriteVenue, 'id' | 'savedAt'>) => void
+  removeFavoriteVenue: (id: UUID) => void
   createGuardian: (profileId: UUID, g: Omit<Guardian, 'id' | 'profileId' | 'verified'>) => Guardian
   verifyGuardian: (profileId: UUID, guardianId: UUID, code: string) => boolean
   createShareSession: (profileId: UUID, method: ShareMethod) => ShareSession
@@ -39,9 +41,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // ── Load profiles from Supabase for a given userId ────────────────────────
-  const syncProfilesFromSupabase = useCallback(async (userId: string) => {
+  const syncProfilesFromSupabase = useCallback(async (_userId: string) => {
     const profiles = await listProfiles()
-    if (profiles.length === 0) return
     setState((prev) => {
       const profileMap = Object.fromEntries(profiles.map((p) => [p.id, p]))
       const next = { ...prev, profiles: { ...prev.profiles, ...profileMap } }
@@ -150,12 +151,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     commit(rest)
   }, [state, commit])
 
-  const createProfileDraft = useCallback((userId: UUID, name: string): Profile => {
+  const createProfileDraft = useCallback((userId: UUID, name: string, type: Profile['type'] = 'primary'): Profile => {
     const now = new Date().toISOString()
     return {
       id: uuid(),
       userId,
-      type: 'primary',
+      type,
       isMinor: false,
       name,
       avatar: {
@@ -271,6 +272,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [state, commit],
   )
 
+  const addFavoriteVenue = useCallback(
+    (v: Omit<FavoriteVenue, 'id' | 'savedAt'>) => {
+      const venue: FavoriteVenue = { ...v, id: uuid(), savedAt: new Date().toISOString() }
+      commit({ ...state, favoriteVenues: [...(state.favoriteVenues ?? []), venue] })
+    },
+    [state, commit],
+  )
+
+  const removeFavoriteVenue = useCallback(
+    (id: UUID) => {
+      commit({ ...state, favoriteVenues: (state.favoriteVenues ?? []).filter((v) => v.id !== id) })
+    },
+    [state, commit],
+  )
+
   const value = useMemo(
     () => ({
       state,
@@ -283,6 +299,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       createShareSession,
       setShareApproved,
       approveMinor,
+      addFavoriteVenue,
+      removeFavoriteVenue,
     }),
     [
       state,
@@ -295,6 +313,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       createShareSession,
       setShareApproved,
       approveMinor,
+      addFavoriteVenue,
+      removeFavoriteVenue,
     ],
   )
 

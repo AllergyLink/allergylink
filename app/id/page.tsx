@@ -54,7 +54,7 @@ export default function IDPage() {
     )
   }
 
-  const qrUrl = `https://id.allergylink.net/${profile.allergyLinkId}`
+  const qrUrl = `https://allergylink.vercel.app/p/${profile.allergyLinkId}`
   const anaphylacticAllergies = profile.allergies.filter((a) => a.isAnaphylactic)
   const otherAllergies = profile.allergies.filter((a) => !a.isAnaphylactic)
 
