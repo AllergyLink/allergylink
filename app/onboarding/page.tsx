@@ -3,8 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import UnifiedNavigation from '@/components/UnifiedNavigation'
-import Footer from '@/components/Footer'
+import Image from 'next/image'
 import { CreateProfileWizard } from '@/components/profile/CreateProfileWizard'
 import { sendPhoneOtp, verifyPhoneOtp } from '@/lib/auth'
 import { useApp } from '@/components/AppProvider'
@@ -48,8 +47,12 @@ function OnboardingContent() {
   if (!authed) {
     return (
       <main style={{ minHeight: '100dvh', background: 'var(--color-bg)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <UnifiedNavigation />
-        <div style={{ maxWidth: '480px', margin: '0 auto', padding: '48px 20px' }}>
+        <header style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', background: 'white' }}>
+          <Link href="/welcome">
+            <Image src="/allergylink-logo.png" alt="AllergyLink" width={1024} height={524} className="h-8 w-auto max-w-[140px] object-contain" />
+          </Link>
+        </header>
+        <div style={{ maxWidth: '480px', margin: '0 auto', padding: '40px 20px' }}>
           <div style={{ background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', padding: '40px 24px' }}>
             <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: '8px' }}>
               Create your account
@@ -131,16 +134,18 @@ function OnboardingContent() {
             </p>
           </div>
         </div>
-        <Footer />
       </main>
     )
   }
 
   return (
     <main style={{ minHeight: '100dvh', background: 'var(--color-bg)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      <UnifiedNavigation />
+      <header style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', background: 'white' }}>
+        <Link href="/welcome">
+          <Image src="/allergylink-logo.png" alt="AllergyLink" width={1024} height={524} className="h-8 w-auto max-w-[140px] object-contain" />
+        </Link>
+      </header>
       <CreateProfileWizard profileType={profileType} />
-      <Footer />
     </main>
   )
 }
