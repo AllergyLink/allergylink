@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { CreateProfileWizard } from '@/components/profile/CreateProfileWizard'
-import { sendPhoneOtp, verifyPhoneOtp } from '@/lib/auth'
+import { signUpWithEmail, signInWithEmail } from '@/lib/auth'
 import { useApp } from '@/components/AppProvider'
 import type { Profile } from '@/lib/types'
 
@@ -15,33 +15,38 @@ function OnboardingContent() {
 
   const { state } = useApp()
   const [authed, setAuthed] = useState(false)
-  const [phone, setPhone] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [otp, setOtp] = useState('')
-  const [authLoading, setAuthLoading] = useState(false)
-  const [authError, setAuthError] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   // Skip auth if already signed in
   useEffect(() => {
     if (state.session?.verified) setAuthed(true)
   }, [state.session?.verified])
 
-  const handleSendCode = async () => {
-    setAuthLoading(true)
-    setAuthError('')
-    const err = await sendPhoneOtp(phone)
-    setAuthLoading(false)
-    if (err) setAuthError(err)
-    else setOtpSent(true)
-  }
-
-  const handleVerifyOtp = async () => {
-    setAuthLoading(true)
-    setAuthError('')
-    const err = await verifyPhoneOtp(phone, otp)
-    setAuthLoading(false)
-    if (err) setAuthError(err)
-    else setAuthed(true)
+  const handleSubmit = async () => {
+    setLoading(true)
+    setError('')
+    if (firstName.trim()) {
+      localStorage.setItem('allergylink_pending_firstName', firstName.trim())
+    }
+    // Try sign up first; if account exists, sign in instead
+    const signUpErr = await signUpWithEmail(email, password)
+    if (signUpErr && !signUpErr.toLowerCase().includes('already')) {
+      setError(signUpErr)
+      setLoading(false)
+      return
+    }
+    const signInErr = await signInWithEmail(email, password)
+    if (signInErr) {
+      setError(signInErr)
+      setLoading(false)
+      return
+    }
+    setAuthed(true)
+    setLoading(false)
   }
 
   if (!authed) {
@@ -58,75 +63,66 @@ function OnboardingContent() {
               Create your account
             </h1>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: '32px' }}>
-              Enter your phone number to get started. We&apos;ll send a one-time code.
+              Enter your details to get started.
             </p>
 
-            {authError && (
+            {error && (
               <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', color: '#b91c1c', fontSize: '0.875rem' }}>
-                {authError}
+                {error}
               </div>
             )}
 
-            {!otpSent ? (
-              <div>
-                <label style={{ display: 'block', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '8px', color: 'var(--color-text)' }}>
-                  Phone number
-                </label>
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="(555) 123-4567"
-                  style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '1rem', fontFamily: 'inherit', marginBottom: '20px', boxSizing: 'border-box' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => void handleSendCode()}
-                  disabled={phone.trim().length < 10 || authLoading}
-                  style={{
-                    width: '100%', padding: '14px', borderRadius: '12px', border: 'none',
-                    background: phone.trim().length >= 10 ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' : 'var(--color-border)',
-                    color: 'white', fontWeight: 600, fontSize: '1rem', cursor: phone.trim().length >= 10 ? 'pointer' : 'not-allowed',
-                  }}
-                >
-                  {authLoading ? 'Sending…' : 'Send verification code'}
-                </button>
-              </div>
-            ) : (
-              <div>
-                <label style={{ display: 'block', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '8px', color: 'var(--color-text)' }}>
-                  Verification code
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '1.25rem', letterSpacing: '0.2em', fontFamily: 'inherit', marginBottom: '20px', boxSizing: 'border-box' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => void handleVerifyOtp()}
-                  disabled={otp.trim().length < 6 || authLoading}
-                  style={{
-                    width: '100%', padding: '14px', borderRadius: '12px', border: 'none',
-                    background: otp.trim().length >= 6 ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' : 'var(--color-border)',
-                    color: 'white', fontWeight: 600, fontSize: '1rem', cursor: otp.trim().length >= 6 ? 'pointer' : 'not-allowed', marginBottom: '12px',
-                  }}
-                >
-                  {authLoading ? 'Verifying…' : 'Verify & continue'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setOtpSent(false); setAuthError('') }}
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'white', color: 'var(--color-text)', fontWeight: 600, fontSize: '0.9375rem', cursor: 'pointer' }}
-                >
-                  Change number
-                </button>
-              </div>
-            )}
+            <label style={{ display: 'block', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text)' }}>
+              First name
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="e.g. Alex"
+              autoComplete="given-name"
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '1rem', fontFamily: 'inherit', marginBottom: '16px', boxSizing: 'border-box' }}
+            />
+
+            <label style={{ display: 'block', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text)' }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '1rem', fontFamily: 'inherit', marginBottom: '16px', boxSizing: 'border-box' }}
+            />
+
+            <label style={{ display: 'block', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text)' }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              autoComplete="new-password"
+              style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '1rem', fontFamily: 'inherit', marginBottom: '24px', boxSizing: 'border-box' }}
+            />
+
+            <button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={!email || password.length < 6 || loading}
+              style={{
+                width: '100%', padding: '14px', borderRadius: '12px', border: 'none',
+                background: (email && password.length >= 6)
+                  ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)'
+                  : 'var(--color-border)',
+                color: 'white', fontWeight: 600, fontSize: '1rem',
+                cursor: (email && password.length >= 6) ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {loading ? 'Setting up…' : 'Get started'}
+            </button>
 
             <p style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
               Already have an account?{' '}

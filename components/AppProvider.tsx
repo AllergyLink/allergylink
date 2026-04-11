@@ -57,14 +57,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         const userId = session.user.id
-        const phone = session.user.phone ?? ''
+        const email = session.user.email ?? session.user.phone ?? ''
         const pendingFirstName = typeof window !== 'undefined'
           ? (localStorage.getItem(FIRST_NAME_KEY) ?? '')
           : ''
 
         setState((prev) => {
           const existing = prev.users[userId]
-          const user: User = existing ?? { id: userId, phoneNumber: phone, firstName: pendingFirstName }
+          const user: User = existing ?? { id: userId, phoneNumber: email, firstName: pendingFirstName }
           // If we have a pending firstName and user didn't have one, update it
           const updatedUser = (!existing?.firstName && pendingFirstName)
             ? { ...user, firstName: pendingFirstName }
@@ -95,12 +95,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return rest
         }
         const userId = session.user.id
-        const phone = session.user.phone ?? ''
+        const email = session.user.email ?? session.user.phone ?? ''
         const pendingFirstName = typeof window !== 'undefined'
           ? (localStorage.getItem(FIRST_NAME_KEY) ?? '')
           : ''
         const existing = prev.users[userId]
-        const user: User = existing ?? { id: userId, phoneNumber: phone, firstName: pendingFirstName }
+        const user: User = existing ?? { id: userId, phoneNumber: email, firstName: pendingFirstName }
         const updatedUser = (!existing?.firstName && pendingFirstName)
           ? { ...user, firstName: pendingFirstName }
           : user
